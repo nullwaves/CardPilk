@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34525.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardPilkApp", "CardPilkApp\CardPilkApp.csproj", "{8BBC5FDB-5032-48C9-B04C-573A92A28F75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardPilkApp", "CardPilkApp\CardPilkApp.csproj", "{8BBC5FDB-5032-48C9-B04C-573A92A28F75}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardLib", "CardLib\CardLib.csproj", "{C981BC43-AF89-4C59-AF7C-AA6B49EADE05}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,6 +19,10 @@ Global
 		{8BBC5FDB-5032-48C9-B04C-573A92A28F75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BBC5FDB-5032-48C9-B04C-573A92A28F75}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8BBC5FDB-5032-48C9-B04C-573A92A28F75}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{C981BC43-AF89-4C59-AF7C-AA6B49EADE05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C981BC43-AF89-4C59-AF7C-AA6B49EADE05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C981BC43-AF89-4C59-AF7C-AA6B49EADE05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C981BC43-AF89-4C59-AF7C-AA6B49EADE05}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,5 @@
 ﻿using CardLib;
+using CardPilkApp.ViewModels;
 using System.Diagnostics;
 
 namespace CardPilkApp
@@ -8,9 +9,13 @@ namespace CardPilkApp
         int count = 0;
         CardManager manager = new(FileSystem.Current.AppDataDirectory+"/cpilk.db");
 
+        internal CardListViewModel _viewmodel;
+
         public MainPage()
         {
             InitializeComponent();
+            _viewmodel = new(manager);
+            BindingContext = _viewmodel;
         }
 
         private async void OnCounterClicked(object sender, EventArgs e)
@@ -31,7 +36,8 @@ namespace CardPilkApp
             Debug.WriteLine($"Created Sets: {ures.CreatedSets}");
             Debug.WriteLine($"Created Prices: {ures.CreatedPrices}");
             Debug.WriteLine($"Updated Qtys: {ures.UpdatedQuantities}");
-    }
+            _viewmodel.RefreshListings();
+        }
     }
 
 }

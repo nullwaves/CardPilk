@@ -209,6 +209,41 @@ namespace CardLib
             }
             return true;
         }
+
+        public async Task<IEnumerable<CardListing>> GetListings()
+        {
+            return await _connection.Table<CardListing>().OrderBy(x => x.Name).ToListAsync();
+        }
+
+        public async Task<IEnumerable<ProductLine>> GetProductLines()
+        {
+            return await _connection.Table<ProductLine>().OrderBy(x => x.Name).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Rarity>> GetRarities()
+        {
+            return await _connection.Table<Rarity>().OrderBy(x => x.Name).ToListAsync();
+        }
+
+        public async Task<IEnumerable<CardCondition>> GetConditions()
+        {
+            return await _connection.Table<CardCondition>().OrderBy(x => x.Name).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Set>> GetSets()
+        {
+            return await _connection.Table<Set>().OrderBy(x => x.Name).ToListAsync();
+        }
+
+        public async Task<TCGMarketPriceHistory> GetNewestPrices(int tcgId)
+        {
+            var price = await _connection
+                .Table<TCGMarketPriceHistory>()
+                .OrderByDescending(x => x.Timestamp)
+                .Where(x => x.TCGplayerId == tcgId)
+                .FirstOrDefaultAsync();
+            return price ?? new TCGMarketPriceHistory() { TCGplayerId = tcgId };
+        }
     }
 
     public class TCGplayerImportResult

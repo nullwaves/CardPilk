@@ -1,18 +1,72 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CardPilkApp.MainPage">
+             xmlns:dao="clr-namespace:CardPilkApp.DataObjects"
+             xmlns:viewmodel="clr-namespace:CardPilkApp.ViewModels"
+             x:Class="CardPilkApp.MainPage"
+             x:DataType="viewmodel:CardListViewModel">
 
-    <ScrollView>
+    <ScrollView >
         <VerticalStackLayout
             Padding="30,0"
             Spacing="25">
-            <Image
-                Source="dotnet_bot.png"
-                HeightRequest="185"
-                Aspect="AspectFit"
-                SemanticProperties.Description="dot net bot in a race car number eight" />
 
+            <Button
+                x:Name="CounterBtn"
+                Text="Import" 
+                SemanticProperties.Hint="Import a csv file from TCGplayer."
+                Clicked="OnCounterClicked"
+                HorizontalOptions="Fill" />
+
+            <FlexLayout Wrap="Wrap"
+                        Margin="20"
+                        BindableLayout.ItemsSource="{Binding Listings}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="dao:CardListingDO">
+                        <Border Stroke="FloralWhite"
+                                StrokeThickness="4"
+                                StrokeShape="RoundRectangle 0,10,10,10"
+                                Margin="4">
+                            <StackLayout MinimumHeightRequest="350"
+                                         WidthRequest="250">
+                                <Label Text="{Binding Name}"
+                                       FontAttributes="Bold"
+                                       HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding CardNumber}"
+                                       HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding Condition}"
+                                       HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding Rarity}"
+                                       HorizontalTextAlignment="Center"/>
+                                <Image
+                                    Source="default_card.png"
+                                    HeightRequest="150"
+                                    Aspect="AspectFit" />
+                                <Label Text="Price:"
+                                       HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding Price}"
+                                       HorizontalTextAlignment="Center"/>
+                                <Label Text="TCG Market Price:"
+                                       HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding TCGMarket}"
+                                       HorizontalTextAlignment="Center"/>
+                                <Label Text="TCG Low Price:"
+                                       HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding TCGLow}"
+                                       HorizontalTextAlignment="Center"/>
+                                <Label Text="TCG Low w/ Shipping:"
+                                       HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding TCGShippedLow}"
+                                       HorizontalTextAlignment="Center"/>
+                                <Label Text="TCG Direct Price:"
+                                       HorizontalTextAlignment="Center"/>
+                                <Label Text="{Binding TCGDirectLow}"
+                                       HorizontalTextAlignment="Center"/>
+                            </StackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
             <Label
                 Text="Hello, World!"
                 Style="{StaticResource Headline}"
@@ -23,13 +77,6 @@
                 Style="{StaticResource SubHeadline}"
                 SemanticProperties.HeadingLevel="Level2"
                 SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Button
-                x:Name="CounterBtn"
-                Text="Click me" 
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="OnCounterClicked"
-                HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </ScrollView>
 
