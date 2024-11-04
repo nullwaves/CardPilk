@@ -2,7 +2,6 @@
 using CardCondition = CardLib.Models.Condition;
 using SQLite;
 using System.Diagnostics;
-using System.Globalization;
 
 namespace CardLib
 {

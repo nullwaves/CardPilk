@@ -1,16 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:dao="clr-namespace:CardPilkApp.DataObjects"
              xmlns:models="clr-namespace:CardLib.Models;assembly=CardLib"
              xmlns:viewmodel="clr-namespace:CardPilkApp.ViewModels"
              x:Class="CardPilkApp.MainPage"
-             x:DataType="viewmodel:CardListViewModel">
+             x:DataType="viewmodel:CardListViewModel"
+             Loaded="Page_Loaded">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Import"
-                     IconImageSource="file_add.png"
-                     Clicked="OnImportClicked"
-                     />
+                     IconImageSource="ic_fluent_document_add_24_color.png"
+                     Clicked="OnImportClicked"/>
     </ContentPage.ToolbarItems>
     <Grid Padding="30,0" VerticalOptions="FillAndExpand">
         <Grid.RowDefinitions>
@@ -33,15 +34,15 @@
                     <Picker x:Name="MaxListingsPicker" ItemsSource="{Binding MaxListingsOptions}" Margin="10, 0" SelectedIndexChanged="MaxListingsPicker_SelectedIndexChanged" />
                 </HorizontalStackLayout>
                 <HorizontalStackLayout Margin="20,0">
-                    <Label Text="Filter by Product Line:" VerticalOptions="CenterAndExpand" />
-                    <Picker x:Name="FilterProductLinePicker" ItemsSource="{Binding ProductLines}" Margin="10, 0" SelectedItem="{Binding FilterByProductLine}" SelectedIndexChanged="SearchInput_Completed" />
+                    <Label Text="Product Line:" VerticalOptions="CenterAndExpand" />
+                    <Picker x:Name="FilterProductLinePicker" ItemsSource="{Binding ProductLines}" Margin="10, 0" SelectedItem="{Binding FilterByProductLine}" SelectedIndexChanged="FilterProductLinePicker_SelectedIndexChanged" />
                 </HorizontalStackLayout>
                 <HorizontalStackLayout Margin="20,0">
-                    <Label Text="Filter by Set:" VerticalOptions="CenterAndExpand" />
-                    <Picker x:Name="FilterSetPicker" ItemsSource="{Binding Sets}" Margin="10, 0" SelectedItem="{Binding FilterBySet}" SelectedIndexChanged="SearchInput_Completed" />
+                    <Label Text="Set:" VerticalOptions="CenterAndExpand" />
+                    <Picker x:Name="FilterSetPicker" ItemsSource="{Binding Sets}" Margin="10, 0" SelectedItem="{Binding FilterBySet}" SelectedIndex="{Binding FilterBySetIndex}" SelectedIndexChanged="SearchInput_Completed" />
                 </HorizontalStackLayout>
                 <HorizontalStackLayout Margin="20,0">
-                    <Label Text="Filter by Set:" VerticalOptions="CenterAndExpand" />
+                    <Label Text="Condition:" VerticalOptions="CenterAndExpand" />
                     <Picker x:Name="FilterConditionPicker" ItemsSource="{Binding Conditions}" Margin="10, 0" SelectedItem="{Binding FilterByCondition}" SelectedIndexChanged="SearchInput_Completed" />
                 </HorizontalStackLayout>
             </FlexLayout>
@@ -61,32 +62,33 @@
                                 <StackLayout MinimumHeightRequest="350"
                                                 WidthRequest="250">
                                     <Label Text="{Binding Name}"
-                                            FontAutoScalingEnabled="True"
-                                            Style="{StaticResource CardName}"/>
+                                           FontAutoScalingEnabled="True"
+                                           Style="{StaticResource CardName}"/>
                                     <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
                                         <Label Text="{Binding CardNumber}"
                                                Padding="10,0"/>
                                         <Label Text="{Binding Rarity}"
                                                Padding="10,0"/>
                                     </HorizontalStackLayout>
-                                    <Label Text="{Binding Condition}"
-                                            HorizontalTextAlignment="Center"/>
+                                    <Label Text="{Binding VariantCount}"
+                                           HorizontalTextAlignment="Center"/>
                                     <Grid Padding="10">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="130"/>
                                             <ColumnDefinition Width="*"/>
                                         </Grid.ColumnDefinitions>
                                         <Label Text="Qty. Available:"
-                                                Style="{StaticResource PriceLabel}"/>
-                                        <Label Text="{Binding TotalQuantity}"
-                                                Grid.Column="1"
-                                                HorizontalTextAlignment="Center"/>
+                                               Style="{StaticResource PriceLabel}"/>
+                                        <Label Text="{Binding SumQuantity}"
+                                               Grid.Column="1"
+                                               HorizontalTextAlignment="Center"/>
                                     </Grid>
-
                                     <Image
                                         Source="default_card.png"
                                         HeightRequest="180"
                                         Aspect="AspectFit" />
+                                    <Picker ItemsSource="{Binding Variants}"
+                                            BindingContextChanged="VariantPicker_BindingChanged"/>
                                     <Grid Padding="10">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="130"/>
@@ -134,6 +136,15 @@
                                                 Grid.Column="1"
                                                 HorizontalTextAlignment="Center"/>
                                     </Grid>
+                                    <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
+                                        <ImageButton HeightRequest="30"
+                                                     Clicked="AddToCart_Clicked"
+                                                     Source="file_add.png">
+                                            <ImageButton.Behaviors>
+                                                <toolkit:IconTintColorBehavior TintColor="LightGreen"/>
+                                            </ImageButton.Behaviors>
+                                        </ImageButton>
+                                    </HorizontalStackLayout>
                                 </StackLayout>
                             </Border>
                         </DataTemplate>

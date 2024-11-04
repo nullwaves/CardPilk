@@ -1,6 +1,5 @@
 ﻿using CardLib;
 using CardPilkApp.ViewModels;
-using System.Diagnostics;
 using System.Text;
 
 namespace CardPilkApp
@@ -17,8 +16,6 @@ namespace CardPilkApp
             InitializeComponent();
             _viewmodel = new(manager);
             BindingContext = _viewmodel;
-            MaxListingsPicker.SelectedIndex = 1;
-            FilterProductLinePicker.SelectedIndex = 0;
         }
 
         private async void OnImportClicked(object sender, EventArgs e)
@@ -43,7 +40,7 @@ namespace CardPilkApp
             resstr.AppendLine($"Created Prices: {ures.CreatedPrices}");
             resstr.AppendLine($"Updated Qtys: {ures.UpdatedQuantities}");
             await DisplayAlert("TCGplayer Import", resstr.ToString(), "Done");
-            _viewmodel.RefreshListings();
+            await _viewmodel.RefreshListings();
             _viewmodel.Search();
         }
 
@@ -65,6 +62,38 @@ namespace CardPilkApp
                 _viewmodel.Search();
             }
         }
-    }
 
+        private async void FilterProductLinePicker_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            object? oldSetFilter = FilterSetPicker.SelectedItem;
+            if (sender is Picker p)
+            {
+                await _viewmodel.UpdateSetsFilter();
+            }
+            if (FilterSetPicker.SelectedIndex < 0) FilterSetPicker.SelectedIndex = 0;
+        }
+
+        private async void Page_Loaded(object sender, EventArgs e)
+        {
+            await _viewmodel.RefreshListings();
+            MaxListingsPicker.SelectedIndex = 1;
+            FilterProductLinePicker.SelectedIndex = 0;
+            FilterSetPicker.SelectedIndex = 0;
+            FilterConditionPicker.SelectedIndex = 0;
+        }
+
+        private void AddToCart_Clicked(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void VariantPicker_BindingChanged(object sender, EventArgs e)
+        {
+            if(sender is Picker p)
+            {
+                if (p.SelectedIndex == -1 && p.Items.Count > 0)
+                    p.SelectedIndex = 0;
+            }
+        }
+    }
 }

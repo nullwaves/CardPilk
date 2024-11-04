@@ -23,12 +23,14 @@ namespace CardPilkApp.ViewModels
         public ObservableCollection<CardCondition> Conditions { get; set; }
         public ProductLine FilterByProductLine { get; set; } = NoProductFilter;
         public Set FilterBySet { get; set; } = NoSetFilter;
+        [ObservableProperty]
+        private int filterBySetIndex = -1;
         public CardCondition FilterByCondition { get; set; } = NoConditionFilter;
         public ObservableCollection<CardListingDO> ResultListings { get; set; }
 
         public CardListViewModel(CardManager manager) 
         {
-            MaxListingsOptions = new[] { 25, 50, 100, 200 };
+            MaxListingsOptions = [25, 50, 100, 200];
             MaxListings = 50;
             Listings = [];
             ProductLines = [];
@@ -37,7 +39,6 @@ namespace CardPilkApp.ViewModels
             ResultListings = [];
             SearchText = string.Empty;
             this.manager = manager;
-            RefreshListings();
         }
 
         internal string fmtPrice(decimal price)
@@ -45,7 +46,7 @@ namespace CardPilkApp.ViewModels
             return price.ToString("$0.00").Replace("$0.00", "--");
         }
 
-        internal async void PopulateListings(IEnumerable<CardListing> newListings)
+        internal async Task PopulateListings(IEnumerable<CardListing> newListings)
         {
             Listings.Clear();
             var lines = await manager.GetProductLines();
@@ -71,10 +72,9 @@ namespace CardPilkApp.ViewModels
             foreach (var c in conds) Conditions.Add(c);
             var raritys = await manager.GetRarities();
             var conditions = await manager.GetConditions();
-            foreach (CardListing l in newListings)
+            foreach (CardListing l in newListings.OrderByDescending(x => x.Price).DistinctBy(x => x.Name))
             {
-                TCGMarketPriceHistory pricing = await manager.GetNewestPrices(l.TCGplayerId);
-               Listings.Add(new()
+                CardListingDO mlist = new()
                 {
                     Id = l.Id,
                     TCGplayerId = l.TCGplayerId,
@@ -83,27 +83,66 @@ namespace CardPilkApp.ViewModels
                     Name = l.Name,
                     CardNumber = l.CardNumber,
                     Rarity = raritys.Where(x => x.Id == l.RarityId).First(),
-                    Condition = conditions.Where(x => x.Id == l.ConditionId).First(),
-                    TotalQuantity = l.TotalQuantity,
-                    Price = fmtPrice(l.Price),
-                    TCGMarket = fmtPrice(pricing.TCGMarketPrice),
-                    TCGLow = fmtPrice(pricing.TCGLowPrice),
-                    TCGShippedLow = fmtPrice(pricing.TCGLowPriceWithShipping),
-                    TCGDirectLow = fmtPrice(pricing.TCGDirectLow),
-                });
+                    Variants = [],
+                };
+                var vars = newListings.Where(x => x.Name == l.Name).ToArray();
+                foreach (CardListing sl in vars)
+                {
+                    TCGMarketPriceHistory pricing = await manager.GetNewestPrices(l.TCGplayerId);
+                    mlist.Variants.Add(new()
+                    {
+                        Id = sl.Id,
+                        TCGplayerId = sl.TCGplayerId,
+                        Condition = conditions.Where(c => c.Id == sl.ConditionId).First(),
+                        TotalQuantity = sl.TotalQuantity,
+                        Price = fmtPrice(sl.Price),
+                        TCGMarket = fmtPrice(pricing.TCGMarketPrice),
+                        TCGLow = fmtPrice(pricing.TCGLowPrice),
+                        TCGShippedLow = fmtPrice(pricing.TCGLowPriceWithShipping),
+                        TCGDirectLow = fmtPrice(pricing.TCGDirectLow),
+                    });
+                }
+               Listings.Add(mlist);
             }
         }
-        internal async void RefreshListings()
+        internal async Task RefreshListings()
         {
-            PopulateListings(await manager.GetListings(SearchText));
+            await PopulateListings(await manager.GetListings(SearchText));
+            Search();
+        }
+
+        internal async Task UpdateSetsFilter()
+        {
+            var oldsetfid = FilterBySet?.Id;
+            Sets.Clear();
+            Sets.Add(NoSetFilter);
+            var line = FilterByProductLine;
+            List<Set> lsets;
+            if (line?.Id > -1)
+            { 
+                lsets = Listings
+                    .Where(x=> x.ProductLine.Id == FilterByProductLine.Id)
+                    .DistinctBy(x => x.Set.Id)
+                    .Select(x => x.Set)
+                    .ToList();
+            }
+            else
+            {
+                lsets = Listings.DistinctBy(x => x.Set.Id).Select(x => x.Set).ToList();
+            }
+            foreach (Set s in lsets) Sets.Add(s);
+            if (oldsetfid is int fid && lsets.Where(x => x.Id == fid).FirstOrDefault() is Set newsetf)
+                FilterBySetIndex = Sets.IndexOf(newsetf);
+            else FilterBySetIndex = 0;
+            Search();
         }
 
         internal void Search()
         {
             ResultListings.Clear();
-            var res = Listings.Where(x => x.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+            var res = Listings.Where(x => x.SearchString.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
             if (InStockOnly)
-                res = res.Where(x => x.TotalQuantity > 0);
+                res = res.Where(x => x.SumQuantity > 0);
             if (FilterByProductLine != null && FilterByProductLine.Id > -1)
             {
                 res = res.Where(x => x.ProductLine.Id == FilterByProductLine.Id);
@@ -114,7 +153,7 @@ namespace CardPilkApp.ViewModels
             }
             if (FilterByCondition != null && FilterByCondition.Id > -1)
             {
-                res = res.Where(x => x.Condition.Id == FilterByCondition.Id);
+                res = res.Where(x => x.Variants.Where(v => v.Condition.Id == FilterByCondition.Id).Any());
             }
             res = res.Take(MaxListings);
             foreach (var item in res)
