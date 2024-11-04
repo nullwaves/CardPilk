@@ -2,82 +2,156 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:dao="clr-namespace:CardPilkApp.DataObjects"
+             xmlns:models="clr-namespace:CardLib.Models;assembly=CardLib"
              xmlns:viewmodel="clr-namespace:CardPilkApp.ViewModels"
              x:Class="CardPilkApp.MainPage"
              x:DataType="viewmodel:CardListViewModel">
-
-    <ScrollView >
-        <VerticalStackLayout
-            Padding="30,0"
-            Spacing="25">
-
-            <Button
-                x:Name="CounterBtn"
-                Text="Import" 
-                SemanticProperties.Hint="Import a csv file from TCGplayer."
-                Clicked="OnCounterClicked"
-                HorizontalOptions="Fill" />
-
-            <FlexLayout Wrap="Wrap"
-                        Margin="20"
-                        BindableLayout.ItemsSource="{Binding Listings}">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="dao:CardListingDO">
-                        <Border Stroke="FloralWhite"
-                                StrokeThickness="4"
-                                StrokeShape="RoundRectangle 0,10,10,10"
-                                Margin="4">
-                            <StackLayout MinimumHeightRequest="350"
-                                         WidthRequest="250">
-                                <Label Text="{Binding Name}"
-                                       FontAttributes="Bold"
-                                       HorizontalTextAlignment="Center"/>
-                                <Label Text="{Binding CardNumber}"
-                                       HorizontalTextAlignment="Center"/>
-                                <Label Text="{Binding Condition}"
-                                       HorizontalTextAlignment="Center"/>
-                                <Label Text="{Binding Rarity}"
-                                       HorizontalTextAlignment="Center"/>
-                                <Image
-                                    Source="default_card.png"
-                                    HeightRequest="150"
-                                    Aspect="AspectFit" />
-                                <Label Text="Price:"
-                                       HorizontalTextAlignment="Center"/>
-                                <Label Text="{Binding Price}"
-                                       HorizontalTextAlignment="Center"/>
-                                <Label Text="TCG Market Price:"
-                                       HorizontalTextAlignment="Center"/>
-                                <Label Text="{Binding TCGMarket}"
-                                       HorizontalTextAlignment="Center"/>
-                                <Label Text="TCG Low Price:"
-                                       HorizontalTextAlignment="Center"/>
-                                <Label Text="{Binding TCGLow}"
-                                       HorizontalTextAlignment="Center"/>
-                                <Label Text="TCG Low w/ Shipping:"
-                                       HorizontalTextAlignment="Center"/>
-                                <Label Text="{Binding TCGShippedLow}"
-                                       HorizontalTextAlignment="Center"/>
-                                <Label Text="TCG Direct Price:"
-                                       HorizontalTextAlignment="Center"/>
-                                <Label Text="{Binding TCGDirectLow}"
-                                       HorizontalTextAlignment="Center"/>
-                            </StackLayout>
-                        </Border>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Import"
+                     IconImageSource="file_add.png"
+                     Clicked="OnImportClicked"
+                     />
+    </ContentPage.ToolbarItems>
+    <Grid Padding="30,0" VerticalOptions="FillAndExpand">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <VerticalStackLayout Margin="0,0,0,10">
+            <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
+                <Entry x:Name="SearchInput" Text="{Binding SearchText}" Margin="10" MinimumWidthRequest="400" Placeholder="Search..." Completed="SearchInput_Completed" />
+                <CheckBox x:Name="ShowInStockOnly" IsChecked="{Binding InStockOnly}" CheckedChanged="ToggleInStockOnly"/>
+                <Label Text="In Stock Only" VerticalOptions="CenterAndExpand"/>
+            </HorizontalStackLayout>
+            <FlexLayout AlignContent="Stretch" HorizontalOptions="CenterAndExpand">
+                <HorizontalStackLayout  Margin="20,0">
+                    <Label Text="Search Results:" VerticalOptions="CenterAndExpand"/>
+                    <Label Text="{Binding ResultListings.Count}" Padding="10, 0" VerticalOptions="CenterAndExpand"/>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Margin="20,0">
+                    <Label Text="Max:" VerticalOptions="CenterAndExpand" />
+                    <Picker x:Name="MaxListingsPicker" ItemsSource="{Binding MaxListingsOptions}" Margin="10, 0" SelectedIndexChanged="MaxListingsPicker_SelectedIndexChanged" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Margin="20,0">
+                    <Label Text="Filter by Product Line:" VerticalOptions="CenterAndExpand" />
+                    <Picker x:Name="FilterProductLinePicker" ItemsSource="{Binding ProductLines}" Margin="10, 0" SelectedItem="{Binding FilterByProductLine}" SelectedIndexChanged="SearchInput_Completed" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Margin="20,0">
+                    <Label Text="Filter by Set:" VerticalOptions="CenterAndExpand" />
+                    <Picker x:Name="FilterSetPicker" ItemsSource="{Binding Sets}" Margin="10, 0" SelectedItem="{Binding FilterBySet}" SelectedIndexChanged="SearchInput_Completed" />
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Margin="20,0">
+                    <Label Text="Filter by Set:" VerticalOptions="CenterAndExpand" />
+                    <Picker x:Name="FilterConditionPicker" ItemsSource="{Binding Conditions}" Margin="10, 0" SelectedItem="{Binding FilterByCondition}" SelectedIndexChanged="SearchInput_Completed" />
+                </HorizontalStackLayout>
             </FlexLayout>
-            <Label
-                Text="Hello, World!"
+        </VerticalStackLayout>
+        <ScrollView VerticalOptions="Fill" HorizontalOptions="Fill" Grid.Row="1" Background="{StaticResource Gray950}" Padding="25">
+            <VerticalStackLayout Spacing="25" HorizontalOptions="Center">
+                <FlexLayout Wrap="Wrap"
+                            Margin="20,0"
+                            BindableLayout.ItemsSource="{Binding ResultListings}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="dao:CardListingDO">
+                            <Border Stroke="FloralWhite"
+                                    StrokeThickness="4"
+                                    StrokeShape="RoundRectangle 0,10,10,10"
+                                    Margin="4"
+                                    Background="{StaticResource OffBlack}">
+                                <StackLayout MinimumHeightRequest="350"
+                                                WidthRequest="250">
+                                    <Label Text="{Binding Name}"
+                                            FontAutoScalingEnabled="True"
+                                            Style="{StaticResource CardName}"/>
+                                    <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
+                                        <Label Text="{Binding CardNumber}"
+                                               Padding="10,0"/>
+                                        <Label Text="{Binding Rarity}"
+                                               Padding="10,0"/>
+                                    </HorizontalStackLayout>
+                                    <Label Text="{Binding Condition}"
+                                            HorizontalTextAlignment="Center"/>
+                                    <Grid Padding="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="130"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Label Text="Qty. Available:"
+                                                Style="{StaticResource PriceLabel}"/>
+                                        <Label Text="{Binding TotalQuantity}"
+                                                Grid.Column="1"
+                                                HorizontalTextAlignment="Center"/>
+                                    </Grid>
+
+                                    <Image
+                                        Source="default_card.png"
+                                        HeightRequest="180"
+                                        Aspect="AspectFit" />
+                                    <Grid Padding="10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="130"/>
+                                            <ColumnDefinition Width="120"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="20"/>
+                                            <RowDefinition Height="20"/>
+                                            <RowDefinition Height="20"/>
+                                            <RowDefinition Height="20"/>
+                                        </Grid.RowDefinitions>
+                                        <Label Text="Price:"
+                                                Grid.Row="0"
+                                                Grid.Column="0"
+                                                Style="{StaticResource PriceLabel}"/>
+                                        <Label Text="{Binding Price}"
+                                                Grid.Row="0"
+                                                Grid.Column="1"
+                                                HorizontalTextAlignment="Center"/>
+                                        <Label Text="TCG Market Price:"
+                                                Grid.Row="1"
+                                                Grid.Column="0"
+                                                Style="{StaticResource PriceLabel}"/>
+                                        <Label Text="{Binding TCGMarket}"
+                                                TextColor="GreenYellow"
+                                                Grid.Row="1"
+                                                Grid.Column="1"
+                                                HorizontalTextAlignment="Center"/>
+                                        <Label Text="TCG Low Price:"
+                                                Grid.Row="2"
+                                                Grid.Column="0"
+                                                Style="{StaticResource PriceLabel}"/>
+                                        <Label Text="{Binding TCGLow}"
+                                                TextColor="DeepPink"
+                                                Grid.Row="2"
+                                                Grid.Column="1"
+                                                HorizontalTextAlignment="Center"/>
+                                        <Label Text="TCG Direct Price:"
+                                                Grid.Row="3"
+                                                Grid.Column="0"
+                                                Style="{StaticResource PriceLabel}"/>
+                                        <Label Text="{Binding TCGDirectLow}"
+                                                TextColor="CornflowerBlue"
+                                                Grid.Row="3"
+                                                Grid.Column="1"
+                                                HorizontalTextAlignment="Center"/>
+                                    </Grid>
+                                </StackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </FlexLayout>
+                <Label
+                Text="CardPilk"
                 Style="{StaticResource Headline}"
                 SemanticProperties.HeadingLevel="Level1" />
 
-            <Label
-                Text="Welcome to &#10;.NET Multi-platform App UI"
+                <Label
+                Text="Try searching..."
                 Style="{StaticResource SubHeadline}"
                 SemanticProperties.HeadingLevel="Level2"
                 SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-        </VerticalStackLayout>
-    </ScrollView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
 
 </ContentPage>

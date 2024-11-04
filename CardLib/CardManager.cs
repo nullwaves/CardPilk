@@ -2,6 +2,7 @@
 using CardCondition = CardLib.Models.Condition;
 using SQLite;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace CardLib
 {
@@ -215,6 +216,15 @@ namespace CardLib
             return await _connection.Table<CardListing>().OrderBy(x => x.Name).ToListAsync();
         }
 
+        public async Task<IEnumerable<CardListing>> GetListings(string searchText)
+        {
+            return await _connection
+                .Table<CardListing>()
+                .OrderBy(x => x.Name)
+                .Where(x => x.Name.ToUpper().Contains(searchText.ToUpper()))
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<ProductLine>> GetProductLines()
         {
             return await _connection.Table<ProductLine>().OrderBy(x => x.Name).ToListAsync();
@@ -256,6 +266,7 @@ namespace CardLib
 
         public TCGplayerImportResult(TCGplayerIOItem[]? items = null, int invalid = 0)
         {
+            ValidHeaders = true;
             Items = items;
             InvalidRows = invalid;
         }
