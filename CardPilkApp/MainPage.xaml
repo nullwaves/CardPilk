@@ -24,7 +24,15 @@
         </Grid.ColumnDefinitions>
         <VerticalStackLayout Grid.ColumnSpan="2" Margin="0,0,0,10">
             <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
-                <Entry x:Name="SearchInput" Text="{Binding SearchText}" Margin="10" MinimumWidthRequest="400" Placeholder="Search..." Completed="SearchInput_Completed" />
+                <Entry x:Name="SearchInput" Text="{Binding SearchText}" Margin="10" MinimumWidthRequest="400" Placeholder="Search..." Completed="SearchInput_Completed">
+                    <Entry.Behaviors>
+                        <toolkit:UserStoppedTypingBehavior 
+                            Command="{Binding SearchCommand}"
+                            StoppedTypingTimeThreshold="500"
+                            MinimumLengthThreshold="3"
+                            ShouldDismissKeyboardAutomatically="False"/>
+                    </Entry.Behaviors>
+                </Entry>
                 <CheckBox x:Name="ShowInStockOnly" IsChecked="{Binding InStockOnly}" CheckedChanged="ToggleInStockOnly"/>
                 <Label Text="In Stock Only" VerticalOptions="CenterAndExpand"/>
             </HorizontalStackLayout>
@@ -196,15 +204,19 @@
                                             <ImageButton Source="plus.png"
                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CardListViewModel}}, Path=AddToCartByIdCommand}"
                                                      CommandParameter="{Binding Id}"
-                                                     BackgroundColor="{StaticResource Primary}"/>
+                                                     BackgroundColor="SeaGreen"/>
                                             <ImageButton Source="minus.png"
                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CardListViewModel}}, Path=RemoveOneFromCartByIdCommand}"
                                                      CommandParameter="{Binding Id}"
-                                                     BackgroundColor="{StaticResource Secondary}"/>
+                                                     BackgroundColor="CadetBlue"/>
                                             <ImageButton Source="trash.png"
                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CardListViewModel}}, Path=RemoveFromCartByIdCommand}"
                                                      CommandParameter="{Binding Id}"
-                                                     BackgroundColor="{StaticResource Tertiary}"/>
+                                                     BackgroundColor="DarkMagenta">
+                                                <ImageButton.Behaviors>
+                                                    <toolkit:IconTintColorBehavior TintColor="{StaticResource Secondary}"/>
+                                                </ImageButton.Behaviors>
+                                            </ImageButton>
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
                                 </HorizontalStackLayout>

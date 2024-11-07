@@ -58,7 +58,7 @@ namespace CardPilkApp
             if (sender is Picker p && p.SelectedIndex != -1)
             {
                 _viewmodel.MaxListings = _viewmodel.MaxListingsOptions[p.SelectedIndex];
-                _viewmodel.Search();
+                _viewmodel.ExecuteSearch();
             }
         }
 

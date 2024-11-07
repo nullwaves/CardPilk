@@ -148,9 +148,11 @@ namespace CardPilkApp.ViewModels
             Search();
         }
 
-        internal void Search()
+        [RelayCommand]
+        internal void Search() { MainThread.BeginInvokeOnMainThread(ExecuteSearch); }
+
+        internal void ExecuteSearch()
         {
-            ResultListings.Clear();
             var res = Listings.Where(x => x.SearchString.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
             if (InStockOnly)
                 res = res.Where(x => x.SumQuantity > 0);
@@ -167,6 +169,7 @@ namespace CardPilkApp.ViewModels
                 res = res.Where(x => x.Variants.Where(v => v.Condition.Id == FilterByCondition.Id).Any());
             }
             res = res.Take(MaxListings);
+            ResultListings.Clear();
             foreach (var item in res)
             {
                 ResultListings.Add(item);
