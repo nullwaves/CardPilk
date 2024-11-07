@@ -62,12 +62,12 @@ namespace CardPilkApp
             }
         }
 
-        private async void FilterProductLinePicker_SelectedIndexChanged(object sender, EventArgs e)
+        private void FilterProductLinePicker_SelectedIndexChanged(object sender, EventArgs e)
         {
             object? oldSetFilter = FilterSetPicker.SelectedItem;
             if (sender is Picker p)
             {
-                await _viewmodel.UpdateSetsFilter();
+                _viewmodel.UpdateSetsFilter();
             }
             if (FilterSetPicker.SelectedIndex < 0) FilterSetPicker.SelectedIndex = 0;
         }

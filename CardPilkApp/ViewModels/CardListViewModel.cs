@@ -122,7 +122,7 @@ namespace CardPilkApp.ViewModels
             Search();
         }
 
-        internal async Task UpdateSetsFilter()
+        internal void UpdateSetsFilter()
         {
             var oldsetfid = FilterBySet?.Id;
             Sets.Clear();
@@ -174,22 +174,22 @@ namespace CardPilkApp.ViewModels
         }
 
         [RelayCommand]
-        internal async Task AddToCart(CardVariantDO card)
+        internal void AddToCart(CardVariantDO card)
         {
-            bool success = await AddOneToCart(card);
+            bool success = AddOneToCart(card);
             if (!success) App.Alerts.ShowAlert("Cart Error", $"Failed to add card id: {card.Id} to the cart.");
         }
 
         [RelayCommand]
-        internal async Task AddToCartById(int variantId)
+        internal void AddToCartById(int variantId)
         {
             var variant = GetVariantById(variantId);
             if (variant == null) return;
-            await AddOneToCart(variant);
+            AddOneToCart(variant);
         }
 
         [RelayCommand]
-        internal async Task RemoveOneFromCartById(int variantId)
+        internal void RemoveOneFromCartById(int variantId)
         {
             var variant = GetVariantById(variantId);
             if (variant == null) return;
@@ -204,7 +204,7 @@ namespace CardPilkApp.ViewModels
         }
 
         [RelayCommand]
-        internal async Task RemoveFromCartById(int variantId)
+        internal void RemoveFromCartById(int variantId)
         {
             var variant = GetVariantById(variantId);
             if (variant == null) return;
@@ -214,7 +214,7 @@ namespace CardPilkApp.ViewModels
             RecalculateCart();
         }
 
-        internal async Task<bool> AddOneToCart(CardVariantDO card)
+        internal bool AddOneToCart(CardVariantDO card)
         {
             var listing = Listings.Where(x => x.Id == card.Id).FirstOrDefault();
             if (listing == null) return false;

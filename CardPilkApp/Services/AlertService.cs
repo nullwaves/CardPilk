@@ -1,4 +1,5 @@
-﻿namespace CardPilkApp.Services
+﻿#pragma warning disable CS8602 // Dereference of a possibly null reference.
+namespace CardPilkApp.Services
 {
     public interface IAlertService
     {

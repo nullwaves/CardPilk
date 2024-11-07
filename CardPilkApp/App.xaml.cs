@@ -1,4 +1,7 @@
-﻿using CardPilkApp.Services;
+﻿#pragma warning disable CS8601 // Possible null reference assignment.
+#pragma warning disable CA2211 // Non-constant fields should not be visible
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+using CardPilkApp.Services;
 
 namespace CardPilkApp
 {
