@@ -89,5 +89,12 @@ namespace CardPilkApp
                     p.SelectedIndex = 0;
             }
         }
+
+        private void VariantPicker_Clicked(object sender, EventArgs e)
+        {
+            SearchInput.Focus();
+            SearchInput.CursorPosition = 0;
+            SearchInput.SelectionLength = SearchInput.Text.Length;
+        }
     }
 }
