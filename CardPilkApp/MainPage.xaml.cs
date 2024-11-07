@@ -6,7 +6,6 @@ namespace CardPilkApp
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
         CardManager manager = new(FileSystem.Current.AppDataDirectory+"/cpilk.db");
 
         internal CardListViewModel _viewmodel;
@@ -80,11 +79,6 @@ namespace CardPilkApp
             FilterProductLinePicker.SelectedIndex = 0;
             FilterSetPicker.SelectedIndex = 0;
             FilterConditionPicker.SelectedIndex = 0;
-        }
-
-        private void AddToCart_Clicked(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         private void VariantPicker_BindingChanged(object sender, EventArgs e)

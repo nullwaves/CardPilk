@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Maui;
+﻿using CardPilkApp.Services;
+using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 
 namespace CardPilkApp
@@ -16,6 +17,8 @@ namespace CardPilkApp
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
+
+            builder.Services.AddSingleton<IAlertService, AlertService>();
 
 #if DEBUG
     		builder.Logging.AddDebug();

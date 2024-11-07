@@ -59,6 +59,9 @@
 	<ItemGroup>
 	  <None Remove="Resources\Images\file_add.svg" />
 	  <None Remove="Resources\Images\ic_fluent_document_add_24_color.svg" />
+	  <None Remove="Resources\Images\minus.svg" />
+	  <None Remove="Resources\Images\plus.svg" />
+	  <None Remove="Resources\Images\trash.svg" />
 	</ItemGroup>
 
 	<ItemGroup>

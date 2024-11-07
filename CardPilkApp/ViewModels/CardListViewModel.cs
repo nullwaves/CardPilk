@@ -2,6 +2,9 @@
 using CardLib.Models;
 using CardPilkApp.DataObjects;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Maui.Animations;
+using SQLitePCL;
 using System.Collections.ObjectModel;
 using CardCondition = CardLib.Models.Condition;
 
@@ -28,7 +31,12 @@ namespace CardPilkApp.ViewModels
         public CardCondition FilterByCondition { get; set; } = NoConditionFilter;
         public ObservableCollection<CardListingDO> ResultListings { get; set; }
 
-        public CardListViewModel(CardManager manager) 
+        // Cart Properties
+        public ObservableCollection<CartLineItemDO> CartItems { get; set; }
+        [ObservableProperty] private string cartCountString = "0 items";
+        [ObservableProperty] private string cartSubtotalString = "$0.00";
+
+        public CardListViewModel(CardManager manager)
         {
             MaxListingsOptions = [25, 50, 100, 200];
             MaxListings = 50;
@@ -38,10 +46,11 @@ namespace CardPilkApp.ViewModels
             Conditions = [];
             ResultListings = [];
             SearchText = string.Empty;
+            CartItems = [];
             this.manager = manager;
         }
 
-        internal string fmtPrice(decimal price)
+        internal static string fmtPrice(decimal price)
         {
             return price.ToString("$0.00").Replace("$0.00", "--");
         }
@@ -61,7 +70,7 @@ namespace CardPilkApp.ViewModels
             Sets.Clear();
             Sets.Add(NoSetFilter);
             FilterBySet = NoSetFilter;
-            foreach(var s in sets)
+            foreach (var s in sets)
             {
                 Sets.Add(s);
             }
@@ -95,16 +104,18 @@ namespace CardPilkApp.ViewModels
                         TCGplayerId = sl.TCGplayerId,
                         Condition = conditions.Where(c => c.Id == sl.ConditionId).First(),
                         TotalQuantity = sl.TotalQuantity,
-                        Price = fmtPrice(sl.Price),
+                        Price = sl.Price,
+                        PriceString = fmtPrice(sl.Price),
                         TCGMarket = fmtPrice(pricing.TCGMarketPrice),
                         TCGLow = fmtPrice(pricing.TCGLowPrice),
                         TCGShippedLow = fmtPrice(pricing.TCGLowPriceWithShipping),
                         TCGDirectLow = fmtPrice(pricing.TCGDirectLow),
                     });
                 }
-               Listings.Add(mlist);
+                Listings.Add(mlist);
             }
         }
+
         internal async Task RefreshListings()
         {
             await PopulateListings(await manager.GetListings(SearchText));
@@ -119,9 +130,9 @@ namespace CardPilkApp.ViewModels
             var line = FilterByProductLine;
             List<Set> lsets;
             if (line?.Id > -1)
-            { 
+            {
                 lsets = Listings
-                    .Where(x=> x.ProductLine.Id == FilterByProductLine.Id)
+                    .Where(x => x.ProductLine.Id == FilterByProductLine.Id)
                     .DistinctBy(x => x.Set.Id)
                     .Select(x => x.Set)
                     .ToList();
@@ -160,6 +171,87 @@ namespace CardPilkApp.ViewModels
             {
                 ResultListings.Add(item);
             }
+        }
+
+        [RelayCommand]
+        internal async Task AddToCart(CardVariantDO card)
+        {
+            bool success = await AddOneToCart(card);
+            if (!success) App.Alerts.ShowAlert("Cart Error", $"Failed to add card id: {card.Id} to the cart.");
+        }
+
+        [RelayCommand]
+        internal async Task AddToCartById(int variantId)
+        {
+            var variant = GetVariantById(variantId);
+            if (variant == null) return;
+            await AddOneToCart(variant);
+        }
+
+        [RelayCommand]
+        internal async Task RemoveOneFromCartById(int variantId)
+        {
+            var variant = GetVariantById(variantId);
+            if (variant == null) return;
+            var line = CartItems.Where(x => x.Id == variant.Id).FirstOrDefault();
+            if (line == null) { App.Alerts.ShowAlert("Cart Error", $"Failed to remove card id: {variant.Id}"); return; }
+            line.Quantity--;
+            if (line.Quantity == 0)
+            {
+                CartItems.Remove(line);
+            }
+            RecalculateCart();
+        }
+
+        [RelayCommand]
+        internal async Task RemoveFromCartById(int variantId)
+        {
+            var variant = GetVariantById(variantId);
+            if (variant == null) return;
+            var line = CartItems.Where(x => x.Id == variant.Id).FirstOrDefault();
+            if (line == null) { App.Alerts.ShowAlert("Cart Error", $"Failed to remove card id: {variant.Id}"); return; }
+            CartItems.Remove(line);
+            RecalculateCart();
+        }
+
+        internal async Task<bool> AddOneToCart(CardVariantDO card)
+        {
+            var listing = Listings.Where(x => x.Id == card.Id).FirstOrDefault();
+            if (listing == null) return false;
+            if (CartItems.Where(x => x.Id == card.Id).FirstOrDefault() is CartLineItemDO cartItem)
+            {
+                cartItem.Quantity += 1;
+            }
+            else
+            {
+                string name = $"{listing.Name} " +
+                    (listing.CardNumber.Length > 0 ? $"- {listing.CardNumber} " : string.Empty) + 
+                    (listing.Rarity.Name.Length > 0 ? $"- {listing.Rarity.Name}" : string.Empty);
+                CartItems.Add(new()
+                {
+                    Id = card.Id,
+                    Name = name,
+                    Condition = card.Condition.Name,
+                    Price = card.Price,
+                    Quantity = 1,
+                });
+            }
+            RecalculateCart();
+            return true;
+        }
+
+        private CardVariantDO? GetVariantById(int variantId) => Listings
+            .Where(x => x.Id == variantId)
+            .FirstOrDefault()?
+            .Variants.Where(x => x.Id == variantId)
+            .FirstOrDefault();
+        private void RecalculateCart()
+        {
+            int q = CartItems.Sum(x => x.Quantity);
+            CartCountString = $"{q} item" + (q > 1 ? "s" : string.Empty);
+            decimal subtotal = 0;
+            foreach (var i in CartItems) subtotal += i.Price * i.Quantity;
+            CartSubtotalString = subtotal.ToString("$0.00");
         }
     }
 }

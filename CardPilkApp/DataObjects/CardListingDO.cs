@@ -14,13 +14,14 @@ namespace CardPilkApp.DataObjects
         public string CardNumber { get; set; }
         public Rarity Rarity { get; set; }
         public List<CardVariantDO> Variants { get; set; }
-        public string Price => Variants.First().Price;
+        public string Price => Variants.First().PriceString;
         public string TCGMarket => Variants.First().TCGMarket;
         public string TCGLow => Variants.First().TCGLow;
         public string TCGShippedLow => Variants.First().TCGShippedLow;
         public string TCGDirectLow => Variants.First().TCGDirectLow;
         public int SumQuantity => Variants.Sum(x => x.TotalQuantity); 
 
+        public CardVariantDO? SelectedVariant { get; set; }
         public string VariantCount => $"{Variants.Count} Variant{(Variants.Count > 1 ? "s" : "")}";
         public string SearchString => $"{Name} {CardNumber}";
     }
@@ -30,7 +31,8 @@ namespace CardPilkApp.DataObjects
         public int Id { get; set; }
         public int TCGplayerId { get; set; }
         public CardCondition Condition { get; set; }
-        public string Price { get; set; }
+        public decimal Price { get; set; }
+        public string PriceString { get; set; }
         public string TCGMarket { get; set; }
         public string TCGLow { get; set; }
         public string TCGShippedLow { get; set; }

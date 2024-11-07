@@ -13,12 +13,16 @@
                      IconImageSource="ic_fluent_document_add_24_color.png"
                      Clicked="OnImportClicked"/>
     </ContentPage.ToolbarItems>
-    <Grid Padding="30,0" VerticalOptions="FillAndExpand">
+    <Grid Padding="20,0,20,20" VerticalOptions="FillAndExpand">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <VerticalStackLayout Margin="0,0,0,10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="400"/>
+        </Grid.ColumnDefinitions>
+        <VerticalStackLayout Grid.ColumnSpan="2" Margin="0,0,0,10">
             <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
                 <Entry x:Name="SearchInput" Text="{Binding SearchText}" Margin="10" MinimumWidthRequest="400" Placeholder="Search..." Completed="SearchInput_Completed" />
                 <CheckBox x:Name="ShowInStockOnly" IsChecked="{Binding InStockOnly}" CheckedChanged="ToggleInStockOnly"/>
@@ -48,7 +52,7 @@
             </FlexLayout>
         </VerticalStackLayout>
         <ScrollView VerticalOptions="Fill" HorizontalOptions="Fill" Grid.Row="1" Background="{StaticResource Gray950}" Padding="25">
-            <VerticalStackLayout Spacing="25" HorizontalOptions="Center">
+            <VerticalStackLayout Spacing="25" >
                 <FlexLayout Wrap="Wrap"
                             Margin="20,0"
                             BindableLayout.ItemsSource="{Binding ResultListings}">
@@ -88,7 +92,10 @@
                                         HeightRequest="180"
                                         Aspect="AspectFit" />
                                     <Picker ItemsSource="{Binding Variants}"
-                                            BindingContextChanged="VariantPicker_BindingChanged"/>
+                                            x:Name="VariantPicker"
+                                            BindingContextChanged="VariantPicker_BindingChanged"
+                                            SelectedItem="{Binding SelectedVariant}"
+                                            Margin="10,0"/>
                                     <Grid Padding="10">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="130"/>
@@ -138,7 +145,8 @@
                                     </Grid>
                                     <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
                                         <ImageButton HeightRequest="30"
-                                                     Clicked="AddToCart_Clicked"
+                                                     CommandParameter="{Binding SelectedVariant}"
+                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CardListViewModel}}, Path=AddToCartCommand}"
                                                      Source="file_add.png">
                                             <ImageButton.Behaviors>
                                                 <toolkit:IconTintColorBehavior TintColor="LightGreen"/>
@@ -152,16 +160,63 @@
                 </FlexLayout>
                 <Label
                 Text="CardPilk"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1" />
+                Style="{StaticResource Headline}" />
 
                 <Label
                 Text="Try searching..."
-                Style="{StaticResource SubHeadline}"
-                SemanticProperties.HeadingLevel="Level2"
-                SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
+                Style="{StaticResource SubHeadline}"/>
             </VerticalStackLayout>
         </ScrollView>
+        <Grid Grid.Row="1" Grid.Column="1" VerticalOptions="Fill" HorizontalOptions="Fill">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="60"/>
+            </Grid.RowDefinitions>
+            <Label Text="Cart"
+                   Style="{StaticResource Headline}"/>
+            <ScrollView VerticalOptions="Fill" Background="{StaticResource Gray600}" Grid.Row="1">
+                <ListView ItemsSource="{Binding CartItems}"
+                      RowHeight="135">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="dao:CartLineItemDO">
+                            <ViewCell>
+                                <HorizontalStackLayout>
+                                    <Image Source="default_card.png"
+                                       HeightRequest="80"
+                                       Aspect="AspectFit"
+                                       Margin="5"/>
+                                    <VerticalStackLayout Padding="5"  MinimumWidthRequest="340">
+                                        <Label Text="{Binding Name}"/>
+                                        <Label Text="{Binding Condition}"/>
+                                        <Label Text="{Binding Quantity, Mode=TwoWay}"/>
+                                        <Label Text="{Binding PriceString}"/>
+                                        <HorizontalStackLayout HorizontalOptions="CenterAndExpand" Spacing="10">
+                                            <ImageButton Source="plus.png"
+                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CardListViewModel}}, Path=AddToCartByIdCommand}"
+                                                     CommandParameter="{Binding Id}"
+                                                     BackgroundColor="{StaticResource Primary}"/>
+                                            <ImageButton Source="minus.png"
+                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CardListViewModel}}, Path=RemoveOneFromCartByIdCommand}"
+                                                     CommandParameter="{Binding Id}"
+                                                     BackgroundColor="{StaticResource Secondary}"/>
+                                            <ImageButton Source="trash.png"
+                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CardListViewModel}}, Path=RemoveFromCartByIdCommand}"
+                                                     CommandParameter="{Binding Id}"
+                                                     BackgroundColor="{StaticResource Tertiary}"/>
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+                                </HorizontalStackLayout>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </ScrollView>
+            <FlexLayout Grid.Row="2" HorizontalOptions="Fill">
+                <Label Text="{Binding CartCountString}" HorizontalOptions="Start" WidthRequest="200" VerticalOptions="Center" Padding="10"/>
+                <Label Text="{Binding CartSubtotalString}" HorizontalTextAlignment="End" WidthRequest="200" VerticalOptions="Center" Padding="10"/>
+            </FlexLayout>
+        </Grid>
     </Grid>
 
 
