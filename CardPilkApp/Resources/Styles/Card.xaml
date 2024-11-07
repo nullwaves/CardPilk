@@ -7,6 +7,7 @@
     <Style TargetType="Label" x:Key="CardName">
         <Setter Property="HorizontalTextAlignment" Value="Center" />
         <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="LineBreakMode" Value="TailTruncation"/>
     </Style>
 
     <Style TargetType="Label" x:Key="PriceLabel">

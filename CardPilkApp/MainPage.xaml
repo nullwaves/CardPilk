@@ -94,7 +94,7 @@
                                     <Picker ItemsSource="{Binding Variants}"
                                             x:Name="VariantPicker"
                                             BindingContextChanged="VariantPicker_BindingChanged"
-                                            SelectedItem="{Binding SelectedVariant}"
+                                            SelectedIndex="{Binding SelectedVariantIndex}"
                                             Margin="10,0"/>
                                     <Grid Padding="10">
                                         <Grid.ColumnDefinitions>

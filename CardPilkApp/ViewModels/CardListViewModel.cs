@@ -216,7 +216,7 @@ namespace CardPilkApp.ViewModels
 
         internal bool AddOneToCart(CardVariantDO card)
         {
-            var listing = Listings.Where(x => x.Id == card.Id).FirstOrDefault();
+            var listing = Listings.Where(x => x.Variants.Where(v => v.Id == card.Id).Any()).FirstOrDefault();
             if (listing == null) return false;
             if (CartItems.Where(x => x.Id == card.Id).FirstOrDefault() is CartLineItemDO cartItem)
             {
