@@ -6,7 +6,7 @@
 + [✔️] Import CSV files exported from TCGplayer
 + [✔️] Filter inventory by In Stock, Product Line, Set, Condition
 + [✔️] Cards grouped together with variants
-+ [❌] Repricer tool
++ [✔️] Repricer tool
 + [✔️] Create "Carts" with inventory changes
 + [❌] Export "Carts" for staging changes into TCGplayer
 + [❌] Export CSV files for TCGplayer with updated prices
