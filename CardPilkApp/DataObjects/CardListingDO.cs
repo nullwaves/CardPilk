@@ -56,7 +56,7 @@ namespace CardPilkApp.DataObjects
 
         public override string ToString()
         {
-            return $"{Condition.Name} - {Price} ({TotalQuantity})";
+            return $"{Condition.Name} - {PriceString} ({TotalQuantity})";
         }
     }
 }

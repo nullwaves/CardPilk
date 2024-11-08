@@ -103,7 +103,7 @@ namespace CardPilkApp.ViewModels
                         Condition = conditions.Where(c => c.Id == sl.ConditionId).First(),
                         TotalQuantity = sl.TotalQuantity,
                         Price = sl.Price,
-                        PriceString = fmtPrice(sl.Price),
+                        PriceString = sl.Price.ToString("$0.00"),
                         TCGMarket = fmtPrice(pricing.TCGMarketPrice),
                         TCGLow = fmtPrice(pricing.TCGLowPrice),
                         TCGShippedLow = fmtPrice(pricing.TCGLowPriceWithShipping),
