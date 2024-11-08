@@ -3,8 +3,6 @@ using CardLib.Models;
 using CardPilkApp.DataObjects;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Maui.Animations;
-using SQLitePCL;
 using System.Collections.ObjectModel;
 using CardCondition = CardLib.Models.Condition;
 
@@ -228,7 +226,7 @@ namespace CardPilkApp.ViewModels
             else
             {
                 string name = $"{listing.Name} " +
-                    (listing.CardNumber.Length > 0 ? $"- {listing.CardNumber} " : string.Empty) + 
+                    (listing.CardNumber.Length > 0 ? $"- {listing.CardNumber} " : string.Empty) +
                     (listing.Rarity.Name.Length > 0 ? $"- {listing.Rarity.Name}" : string.Empty);
                 CartItems.Add(new()
                 {
@@ -255,6 +253,17 @@ namespace CardPilkApp.ViewModels
             decimal subtotal = 0;
             foreach (var i in CartItems) subtotal += i.Price * i.Quantity;
             CartSubtotalString = subtotal.ToString("$0.00");
+        }
+
+        public static string[] Pricers = ["Low", "Market", "Shipped Low", "Direct Low"];
+
+        internal async Task<bool> RepriceCards(string basepricer, decimal percent, decimal minPrice, bool includeOOS)
+        {
+            if (!CardManager.Pricers.Contains(basepricer)) return false;
+            if (percent <= 0 || minPrice <= 0) return false;
+            RepricerUpdate res = await manager.RepriceCards(includeOOS, basepricer, percent, minPrice);
+            await RefreshListings();
+            return res.PricesChanged > 0;
         }
     }
 }

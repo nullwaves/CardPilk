@@ -47,7 +47,6 @@
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
-		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
 
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
@@ -58,10 +57,12 @@
 
 	<ItemGroup>
 	  <None Remove="Resources\Images\file_add.svg" />
-	  <None Remove="Resources\Images\ic_fluent_document_add_24_color.svg" />
 	  <None Remove="Resources\Images\minus.svg" />
 	  <None Remove="Resources\Images\plus.svg" />
+	  <None Remove="Resources\Images\save.svg" />
+	  <None Remove="Resources\Images\tag.svg" />
 	  <None Remove="Resources\Images\trash.svg" />
+	  <None Remove="Resources\Images\upload.svg" />
 	</ItemGroup>
 
 	<ItemGroup>

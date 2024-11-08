@@ -10,8 +10,11 @@
              Loaded="Page_Loaded">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Import"
-                     IconImageSource="ic_fluent_document_add_24_color.png"
+                     IconImageSource="upload.png"
                      Clicked="OnImportClicked"/>
+        <ToolbarItem Text="Repricer Tool"
+                     IconImageSource="tag.png"
+                     Clicked="OnRepricerClicked"/>
     </ContentPage.ToolbarItems>
     <Grid Padding="20,0,20,20" VerticalOptions="FillAndExpand">
         <Grid.RowDefinitions>
@@ -181,6 +184,7 @@
                 <RowDefinition Height="60"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="60"/>
+                <RowDefinition Height="45"/>
             </Grid.RowDefinitions>
             <Label Text="Cart"
                    Style="{StaticResource Headline}"/>
@@ -190,13 +194,17 @@
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="dao:CartLineItemDO">
                             <ViewCell>
-                                <HorizontalStackLayout>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="60"/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
                                     <Image Source="default_card.png"
                                        HeightRequest="80"
                                        Aspect="AspectFit"
                                        Margin="5"/>
-                                    <VerticalStackLayout Padding="5"  MinimumWidthRequest="340">
-                                        <Label Text="{Binding Name}"/>
+                                    <VerticalStackLayout Padding="5"  MinimumWidthRequest="340" Grid.Column="1">
+                                        <Label Text="{Binding Name}" LineBreakMode="TailTruncation"/>
                                         <Label Text="{Binding Condition}"/>
                                         <Label Text="{Binding Quantity, Mode=TwoWay}"/>
                                         <Label Text="{Binding PriceString}"/>
@@ -219,7 +227,7 @@
                                             </ImageButton>
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
-                                </HorizontalStackLayout>
+                                </Grid>
                             </ViewCell>
                         </DataTemplate>
                     </ListView.ItemTemplate>
@@ -228,6 +236,9 @@
             <FlexLayout Grid.Row="2" HorizontalOptions="Fill">
                 <Label Text="{Binding CartCountString}" HorizontalOptions="Start" WidthRequest="200" VerticalOptions="Center" Padding="10"/>
                 <Label Text="{Binding CartSubtotalString}" HorizontalTextAlignment="End" WidthRequest="200" VerticalOptions="Center" Padding="10"/>
+            </FlexLayout>
+            <FlexLayout Grid.Row="3" HorizontalOptions="Center">
+                <ImageButton Source="save.png" />
             </FlexLayout>
         </Grid>
     </Grid>

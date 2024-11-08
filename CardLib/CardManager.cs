@@ -2,6 +2,8 @@
 using CardCondition = CardLib.Models.Condition;
 using SQLite;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 
 namespace CardLib
 {
@@ -9,24 +11,25 @@ namespace CardLib
     public class CardManager
     {
         // Consts
-        static string[] TCGplayerHeaders = [
+        public static string[] TCGplayerHeaders = [
             "TCGplayer Id",
             "Product Line",
             "Set Name",
             "Product Name",
             "Title",
             "Number",
-            "Rarity", 
-            "Condition", 
+            "Rarity",
+            "Condition",
             "TCG Market Price",
-            "TCG Direct Low", 
-            "TCG Low Price With Shipping", 
-            "TCG Low Price", 
-            "Total Quantity", 
-            "Add to Quantity", 
+            "TCG Direct Low",
+            "TCG Low Price With Shipping",
+            "TCG Low Price",
+            "Total Quantity",
+            "Add to Quantity",
             "TCG Marketplace Price",
             "Photo URL"
             ];
+        public static string[] Pricers = ["Low", "Market", "Shipped Low", "Direct Low"];
 
         // Props
         private string _dbPath;
@@ -36,13 +39,13 @@ namespace CardLib
         {
             _dbPath = dbPath;
             _connection = new SQLiteAsyncConnection(_dbPath);
-            InitDatabase();
+            MainThread.BeginInvokeOnMainThread(InitDatabase);
         }
 
-        private void InitDatabase()
+        private async void InitDatabase()
         {
-            _connection.CreateTablesAsync(
-                CreateFlags.AutoIncPK, 
+            CreateTablesResult res = await _connection.CreateTablesAsync(
+                CreateFlags.AutoIncPK,
                 [
                     typeof(ProductLine),
                     typeof(Rarity),
@@ -50,8 +53,14 @@ namespace CardLib
                     typeof(Set),
                     typeof(CardListing),
                     typeof(TCGMarketPriceHistory),
+                    typeof(RepricerUpdate),
+                    //typeof(Cart),
                 ]
             );
+            foreach (var item in res.Results.Keys)
+            {
+                Debug.WriteLine($"TABLES: {item.Name} - Status: {res.Results[item]}");
+            }
         }
 
         public async Task<TCGplayerImportResult> ImportFromTCGplayer(FileResult file)
@@ -64,13 +73,14 @@ namespace CardLib
                 return TCGplayerImportResult.InvalidHeaders;
             List<TCGplayerIOItem> items = new();
             int invalidLines = 0;
-            while(fs.Position < fs.Length-1)
+            while (fs.Position < fs.Length - 1)
             {
                 string ln = fs.Readln();
                 try
                 {
                     items.Add(TCGplayerIOItem.FromRowString(ln));
-                } catch (Exception e)
+                }
+                catch (Exception e)
                 {
                     Debug.WriteLine(e.Message);
                     invalidLines++;
@@ -116,7 +126,7 @@ namespace CardLib
                     var rarity = await GetRarityByName(rawItem.Rarity);
                     if (rarity == null)
                     {
-                        int rarin = await _connection.InsertAsync(new Rarity() { Name = rawItem.Rarity});
+                        int rarin = await _connection.InsertAsync(new Rarity() { Name = rawItem.Rarity });
                         results.CreatedRarities += rarin;
                         rarity = await GetRarityByName(rawItem.Rarity);
                         if (rarity == null) throw new Exception("Failed to Insert new Rarity");
@@ -179,7 +189,7 @@ namespace CardLib
 
         private async Task<CardCondition?> GetConditionByName(string name)
         {
-            return await _connection.Table<CardCondition>().Where(x=>x.Name == name).FirstOrDefaultAsync();
+            return await _connection.Table<CardCondition>().Where(x => x.Name == name).FirstOrDefaultAsync();
         }
 
         private async Task<ProductLine?> GetProductLineByName(string name)
@@ -189,7 +199,7 @@ namespace CardLib
 
         private async Task<Rarity?> GetRarityByName(string name)
         {
-            return await _connection.Table<Rarity>().Where(x=>x.Name == name).FirstOrDefaultAsync();
+            return await _connection.Table<Rarity>().Where(x => x.Name == name).FirstOrDefaultAsync();
         }
 
         private async Task<Set?> GetSetByName(string name)
@@ -202,7 +212,8 @@ namespace CardLib
             if (headers.Length != TCGplayerHeaders.Length) return false;
             for (int i = 0; i < headers.Length; i++)
             {
-                if (headers[i] != TCGplayerHeaders[i]) {
+                if (headers[i] != TCGplayerHeaders[i])
+                {
                     Debug.WriteLine($"Header Index {i} \"{headers[i]}\"does not match \"{TCGplayerHeaders[i]}\"");
                     return false;
                 }
@@ -253,13 +264,93 @@ namespace CardLib
                 .FirstOrDefaultAsync();
             return price ?? new TCGMarketPriceHistory() { TCGplayerId = tcgId };
         }
+
+        public async Task<IEnumerable<Cart>> GetCarts()
+        {
+            return await _connection.Table<Cart>().ToListAsync();
+        }
+
+        public async Task<int> UpsertCart(Cart cart)
+        {
+            if (!cart.Data.Validate()) return 0;
+            return await _connection.InsertOrReplaceAsync(cart);
+        }
+
+        public async Task<RepricerUpdate> RepriceCards(bool includeOOS, string basepricer, decimal percent, decimal minPrice)
+        {
+            percent = percent / 100;
+            RepricerUpdate update = new()
+            {
+                RunAgainstAllCards = includeOOS,
+                BasePrice = basepricer,
+                Percentage = percent,
+                MinimumPrice = minPrice,
+                PricesChanged = 0,
+                GrossChange = 0,
+                NetChange = 0,
+            };
+            if (Pricers.Contains(basepricer))
+            {
+                List<CardListing> toUpdate = includeOOS ? await _connection.Table<CardListing>().ToListAsync() : await _connection.Table<CardListing>().Where(x => x.TotalQuantity > 0).ToListAsync();
+                Stack<int> NoOp = [];
+                List<RepricerChange> changes = new List<RepricerChange>(toUpdate.Count);
+                for (int i = 0; i < toUpdate.Count; i++)
+                {
+                    TCGMarketPriceHistory refPrices = await GetNewestPrices(toUpdate[i].TCGplayerId);
+                    decimal oldPrice = toUpdate[i].Price;
+                    decimal refPrice;
+                    switch (basepricer)
+                    {
+                        case "Low":
+                            refPrice = refPrices.TCGLowPrice; break;
+                        case "Shipped Low":
+                            refPrice = refPrices.TCGLowPriceWithShipping; break;
+                        case "Direct Low":
+                            refPrice = refPrices.TCGDirectLow; break;
+                        case "Market":
+                        default:
+                            refPrice = refPrices.TCGMarketPrice; break;
+                    }
+                    decimal newPrice = Math.Round(refPrice * percent, 2);
+                    if (newPrice != oldPrice)
+                    {
+                        var change = new RepricerChange
+                        {
+                            CardId = toUpdate[i].Id,
+                            Old = oldPrice,
+                            Delta = newPrice - oldPrice
+                        };
+                        if (newPrice < minPrice) newPrice = minPrice;
+                        changes.Add(change);
+                        toUpdate[i].Price = newPrice;
+                        update.PricesChanged++;
+                        update.GrossChange += Math.Abs(change.Delta);
+                        update.NetChange += change.Delta;
+                    }
+                    else
+                    {
+                        NoOp.Push(i);
+                    }
+                }
+                int remove;
+                while (NoOp.TryPop(out remove))
+                {
+                    toUpdate.RemoveAt(remove);
+                }
+                update.Changes = JsonSerializer.Serialize(changes.ToArray());
+                int res = await _connection.UpdateAllAsync(toUpdate.ToArray());
+                if (res != update.PricesChanged) Debug.WriteLine($"WARNING: Updated {res} listings, but expected to update {update.PricesChanged}");
+            }
+            await _connection.InsertAsync(update);
+            return update;
+        }
     }
 
     public class TCGplayerImportResult
     {
-        public bool ValidHeaders { get; set;}
-        public int InvalidRows { get; set;}
-        public TCGplayerIOItem[]? Items { get; set;}
+        public bool ValidHeaders { get; set; }
+        public int InvalidRows { get; set; }
+        public TCGplayerIOItem[]? Items { get; set; }
 
         public static TCGplayerImportResult InvalidHeaders => new TCGplayerImportResult() { ValidHeaders = false };
 
@@ -281,4 +372,5 @@ namespace CardLib
         public int CreatedSets { get; set; }
         public int UpdatedQuantities { get; set; }
     }
+
 }
