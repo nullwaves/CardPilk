@@ -2,8 +2,6 @@
 using CardCondition = CardLib.Models.Condition;
 using SQLite;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
 
 namespace CardLib
 {
@@ -54,7 +52,7 @@ namespace CardLib
                     typeof(CardListing),
                     typeof(TCGMarketPriceHistory),
                     typeof(RepricerUpdate),
-                    //typeof(Cart),
+                    typeof(Cart),
                 ]
             );
             foreach (var item in res.Results.Keys)
@@ -63,6 +61,7 @@ namespace CardLib
             }
         }
 
+        #region TCGImport
         public async Task<TCGplayerImportResult> ImportFromTCGplayer(FileResult file)
         {
             Stream fs = await file.OpenReadAsync();
@@ -182,6 +181,22 @@ namespace CardLib
             return results;
         }
 
+        private bool ValidateHeaders(string[] headers)
+        {
+            if (headers.Length != TCGplayerHeaders.Length) return false;
+            for (int i = 0; i < headers.Length; i++)
+            {
+                if (headers[i] != TCGplayerHeaders[i])
+                {
+                    Debug.WriteLine($"Header Index {i} \"{headers[i]}\"does not match \"{TCGplayerHeaders[i]}\"");
+                    return false;
+                }
+            }
+            return true;
+        }
+        #endregion
+
+        #region Getters
         private async Task<CardListing?> GetCardListingByTCGId(int id)
         {
             return await _connection.Table<CardListing>().Where(x => x.TCGplayerId == id).FirstOrDefaultAsync();
@@ -205,20 +220,6 @@ namespace CardLib
         private async Task<Set?> GetSetByName(string name)
         {
             return await _connection.Table<Set>().Where(x => x.Name == name).FirstOrDefaultAsync();
-        }
-
-        private bool ValidateHeaders(string[] headers)
-        {
-            if (headers.Length != TCGplayerHeaders.Length) return false;
-            for (int i = 0; i < headers.Length; i++)
-            {
-                if (headers[i] != TCGplayerHeaders[i])
-                {
-                    Debug.WriteLine($"Header Index {i} \"{headers[i]}\"does not match \"{TCGplayerHeaders[i]}\"");
-                    return false;
-                }
-            }
-            return true;
         }
 
         public async Task<IEnumerable<CardListing>> GetListings()
@@ -269,10 +270,10 @@ namespace CardLib
         {
             return await _connection.Table<Cart>().ToListAsync();
         }
+        #endregion
 
         public async Task<int> UpsertCart(Cart cart)
         {
-            if (!cart.Data.Validate()) return 0;
             return await _connection.InsertOrReplaceAsync(cart);
         }
 
@@ -337,7 +338,7 @@ namespace CardLib
                 {
                     toUpdate.RemoveAt(remove);
                 }
-                update.Changes = JsonSerializer.Serialize(changes.ToArray());
+                update.SetChanges(changes.ToArray());
                 int res = await _connection.UpdateAllAsync(toUpdate.ToArray());
                 if (res != update.PricesChanged) Debug.WriteLine($"WARNING: Updated {res} listings, but expected to update {update.PricesChanged}");
             }

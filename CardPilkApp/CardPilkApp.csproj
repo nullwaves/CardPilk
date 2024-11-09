@@ -57,6 +57,7 @@
 
 	<ItemGroup>
 	  <None Remove="Resources\Images\file_add.svg" />
+	  <None Remove="Resources\Images\history.svg" />
 	  <None Remove="Resources\Images\minus.svg" />
 	  <None Remove="Resources\Images\plus.svg" />
 	  <None Remove="Resources\Images\save.svg" />
@@ -78,6 +79,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="CartListPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Resources\Styles\Card.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

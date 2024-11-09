@@ -265,5 +265,39 @@ namespace CardPilkApp.ViewModels
             await RefreshListings();
             return res.PricesChanged > 0;
         }
+
+        public async Task<int> SaveCart()
+        {
+            List<CartLineItem> items = new();
+            for (int i = 0; i < CartItems.Count; i++)
+            {
+                var c = CartItems[i];
+                items.Add(new()
+                {
+                    CardId = c.Id,
+                    Name = c.Name + (c.Condition.Length > 0 ? $" - {c.Condition}" : string.Empty),
+                    Price = CartItems[i].Price,
+                    Quantity = CartItems[i].Quantity,
+                    Discount = 0,
+                    Subtotal = CartItems[i].Subtotal,
+                });
+            }
+            Cart cart = new Cart();
+            var success = cart.TrySetData(new() { LineItems = items.ToArray() });
+            var ret = 0;
+            if (success)
+            {
+                ret = await manager.UpsertCart(cart);
+                if (ret > 0)
+                {
+                    CartItems.Clear();
+                }
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("Cart Error", "Failed to Save Cart", "OK");
+            }
+            return ret;
+        }
     }
 }

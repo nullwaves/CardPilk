@@ -1,6 +1,5 @@
 ﻿#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 using CommunityToolkit.Mvvm.ComponentModel;
-using System.Diagnostics;
 
 namespace CardPilkApp.DataObjects
 {
@@ -14,5 +13,6 @@ namespace CardPilkApp.DataObjects
         private int quantity;
 
         public string PriceString => Price.ToString("$0.00");
+        public decimal Subtotal => Price * Quantity;
     }
 }

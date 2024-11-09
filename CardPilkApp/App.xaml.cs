@@ -9,12 +9,14 @@ namespace CardPilkApp
     {
         public static IServiceProvider ServiceProvider;
         public static IAlertService Alerts;
+        public static ICardLibService CardLib;
 
         public App(IServiceProvider provider)
         {
             InitializeComponent();
             ServiceProvider = provider;
             Alerts = provider.GetService<IAlertService>();
+            CardLib = provider.GetService<ICardLibService>();
             MainPage = new AppShell();
         }
     }

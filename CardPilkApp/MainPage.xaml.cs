@@ -6,7 +6,7 @@ namespace CardPilkApp
 {
     public partial class MainPage : ContentPage
     {
-        CardManager manager = new(FileSystem.Current.AppDataDirectory + "/cpilk.db");
+        CardManager manager = App.CardLib.GetManager();
 
         internal CardListViewModel _viewmodel;
 
@@ -111,6 +111,17 @@ namespace CardPilkApp
             if (!decimal.TryParse(minimumPriceString, out minPrice)) { await DisplayAlert("Repricer Tool", "Invalid Minimum Price Entered.", "OK"); return; }
             bool includeOOS = await DisplayActionSheet("Include Out of Stock?", "No", null, ["Yes"]) == "Yes";
             await _viewmodel.RepriceCards(basepricer, percent, minPrice, includeOOS);
+        }
+
+        private async void SaveCart_Clicked(object sender, EventArgs e)
+        {
+            if (_viewmodel.CartItems.Count > 0)
+                await _viewmodel.SaveCart();
+        }
+
+        private async void CartHistory_Clicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("/Carts");
         }
     }
 }

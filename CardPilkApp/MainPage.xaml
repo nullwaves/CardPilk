@@ -154,15 +154,13 @@
                                                 Grid.Column="1"
                                                 HorizontalTextAlignment="Center"/>
                                     </Grid>
-                                    <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
+                                    <HorizontalStackLayout HorizontalOptions="CenterAndExpand" Spacing="10">
                                         <ImageButton HeightRequest="30"
                                                      CommandParameter="{Binding SelectedVariant}"
                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CardListViewModel}}, Path=AddToCartCommand}"
                                                      Clicked="VariantPicker_Clicked"
-                                                     Source="file_add.png">
-                                            <ImageButton.Behaviors>
-                                                <toolkit:IconTintColorBehavior TintColor="LightGreen"/>
-                                            </ImageButton.Behaviors>
+                                                     Source="file_add.png"
+                                                     BackgroundColor="LightGreen">
                                         </ImageButton>
                                     </HorizontalStackLayout>
                                 </StackLayout>
@@ -238,7 +236,10 @@
                 <Label Text="{Binding CartSubtotalString}" HorizontalTextAlignment="End" WidthRequest="200" VerticalOptions="Center" Padding="10"/>
             </FlexLayout>
             <FlexLayout Grid.Row="3" HorizontalOptions="Center">
-                <ImageButton Source="save.png" />
+                <ImageButton Source="history.png" Clicked="CartHistory_Clicked" HeightRequest="30" BackgroundColor="{StaticResource PrimaryDark}">
+                </ImageButton>
+                <ImageButton Source="save.png" Clicked="SaveCart_Clicked" HeightRequest="30" BackgroundColor="{StaticResource PrimaryDark}">
+                </ImageButton>
             </FlexLayout>
         </Grid>
     </Grid>
