@@ -15,6 +15,10 @@ namespace CardPilkApp
             InitializeComponent();
             _viewmodel = new(manager);
             BindingContext = _viewmodel;
+            MaxListingsPicker.SelectedIndex = 1;
+            FilterProductLinePicker.SelectedIndex = 0;
+            FilterSetPicker.SelectedIndex = 0;
+            FilterConditionPicker.SelectedIndex = 0;
         }
 
         private async void OnImportClicked(object sender, EventArgs e)
@@ -39,7 +43,6 @@ namespace CardPilkApp
             resstr.AppendLine($"Created Prices: {ures.CreatedPrices}");
             resstr.AppendLine($"Updated Qtys: {ures.UpdatedQuantities}");
             await DisplayAlert("TCGplayer Import", resstr.ToString(), "Done");
-            await _viewmodel.RefreshListings();
             _viewmodel.Search();
         }
 
@@ -72,13 +75,8 @@ namespace CardPilkApp
             if (FilterSetPicker.SelectedIndex < 0) FilterSetPicker.SelectedIndex = 0;
         }
 
-        private async void Page_Loaded(object sender, EventArgs e)
+        private void Page_Loaded(object sender, EventArgs e)
         {
-            await _viewmodel.RefreshListings();
-            MaxListingsPicker.SelectedIndex = 1;
-            FilterProductLinePicker.SelectedIndex = 0;
-            FilterSetPicker.SelectedIndex = 0;
-            FilterConditionPicker.SelectedIndex = 0;
         }
 
         private void VariantPicker_BindingChanged(object sender, EventArgs e)
@@ -90,8 +88,9 @@ namespace CardPilkApp
             }
         }
 
-        private void VariantPicker_Clicked(object sender, EventArgs e)
+        private async void VariantPicker_Clicked(object sender, EventArgs e)
         {
+            await CartScrollView.ScrollToAsync(0,int.MaxValue, true);
             SearchInput.Focus();
             SearchInput.CursorPosition = 0;
             SearchInput.SelectionLength = SearchInput.Text.Length;

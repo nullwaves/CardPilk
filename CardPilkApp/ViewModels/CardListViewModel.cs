@@ -78,7 +78,6 @@ namespace CardPilkApp.ViewModels
             FilterByCondition = NoConditionFilter;
             foreach (var c in conds) Conditions.Add(c);
             var raritys = await manager.GetRarities();
-            var conditions = await manager.GetConditions();
             foreach (CardListing l in newListings.OrderByDescending(x => x.Price).DistinctBy(x => x.Name))
             {
                 CardListingDO mlist = new()
@@ -92,18 +91,18 @@ namespace CardPilkApp.ViewModels
                     Rarity = raritys.Where(x => x.Id == l.RarityId).First(),
                     Variants = [],
                 };
-                var vars = newListings.Where(x => x.Name == l.Name).ToArray();
-                foreach (CardListing sl in vars)
+                var variants = newListings.Where(x => x.Name == l.Name).ToArray();
+                foreach (CardListing variant in variants)
                 {
                     TCGMarketPriceHistory pricing = await manager.GetNewestPrices(l.TCGplayerId);
                     mlist.Variants.Add(new()
                     {
-                        Id = sl.Id,
-                        TCGplayerId = sl.TCGplayerId,
-                        Condition = conditions.Where(c => c.Id == sl.ConditionId).First(),
-                        TotalQuantity = sl.TotalQuantity,
-                        Price = sl.Price,
-                        PriceString = sl.Price.ToString("$0.00"),
+                        Id = variant.Id,
+                        TCGplayerId = variant.TCGplayerId,
+                        Condition = conds.Where(c => c.Id == variant.ConditionId).First(),
+                        TotalQuantity = variant.TotalQuantity,
+                        Price = variant.Price,
+                        PriceString = variant.Price.ToString("$0.00"),
                         TCGMarket = fmtPrice(pricing.TCGMarketPrice),
                         TCGLow = fmtPrice(pricing.TCGLowPrice),
                         TCGShippedLow = fmtPrice(pricing.TCGLowPriceWithShipping),
@@ -112,12 +111,6 @@ namespace CardPilkApp.ViewModels
                 }
                 Listings.Add(mlist);
             }
-        }
-
-        internal async Task RefreshListings()
-        {
-            await PopulateListings(await manager.GetListings(SearchText));
-            Search();
         }
 
         internal void UpdateSetsFilter()
@@ -149,26 +142,28 @@ namespace CardPilkApp.ViewModels
         [RelayCommand]
         internal void Search() { MainThread.BeginInvokeOnMainThread(ExecuteSearch); }
 
-        internal void ExecuteSearch()
+        internal async void ExecuteSearch()
         {
-            var res = Listings.Where(x => x.SearchString.Contains(SearchText, StringComparison.OrdinalIgnoreCase));
+            var res = manager.QueryCardListings().Where(x => x.Name.ToUpper().Contains(SearchText.ToUpper()) || x.CardNumber.Contains(SearchText));
             if (InStockOnly)
-                res = res.Where(x => x.SumQuantity > 0);
+                res = res.Where(x => x.TotalQuantity > 0);
             if (FilterByProductLine != null && FilterByProductLine.Id > -1)
             {
-                res = res.Where(x => x.ProductLine.Id == FilterByProductLine.Id);
+                res = res.Where(x => x.ProductLineId == FilterByProductLine.Id);
             }
             if (FilterBySet != null && FilterBySet.Id > -1)
             {
-                res = res.Where(x => x.Set.Id == FilterBySet.Id);
+                res = res.Where(x => x.SetId == FilterBySet.Id);
             }
             if (FilterByCondition != null && FilterByCondition.Id > -1)
             {
-                res = res.Where(x => x.Variants.Where(v => v.Condition.Id == FilterByCondition.Id).Any());
+                res = res.Where(x => x.ConditionId == FilterByCondition.Id);
             }
-            res = res.Take(MaxListings);
+            var all = await res.ToListAsync();
+            var uniqs = all.Select(x => x.Name).DistinctBy(x => x).Take(MaxListings).ToArray(); ;
+            await PopulateListings(await manager.QueryCardListings().Where(x => uniqs.Contains(x.Name)).ToListAsync());
             ResultListings.Clear();
-            foreach (var item in res)
+            foreach (var item in Listings)
             {
                 ResultListings.Add(item);
             }
@@ -182,9 +177,9 @@ namespace CardPilkApp.ViewModels
         }
 
         [RelayCommand]
-        internal void AddToCartById(int variantId)
+        internal async Task AddToCartById(int variantId)
         {
-            var variant = GetVariantById(variantId);
+            var variant = await GetVariantById(variantId);
             if (variant == null) return;
             AddOneToCart(variant);
         }
@@ -192,10 +187,8 @@ namespace CardPilkApp.ViewModels
         [RelayCommand]
         internal void RemoveOneFromCartById(int variantId)
         {
-            var variant = GetVariantById(variantId);
-            if (variant == null) return;
-            var line = CartItems.Where(x => x.Id == variant.Id).FirstOrDefault();
-            if (line == null) { App.Alerts.ShowAlert("Cart Error", $"Failed to remove card id: {variant.Id}"); return; }
+            var line = CartItems.Where(x => x.Id == variantId).FirstOrDefault();
+            if (line == null) { App.Alerts.ShowAlert("Cart Error", $"Failed to remove card id: {variantId}"); return; }
             line.Quantity--;
             if (line.Quantity == 0)
             {
@@ -207,10 +200,8 @@ namespace CardPilkApp.ViewModels
         [RelayCommand]
         internal void RemoveFromCartById(int variantId)
         {
-            var variant = GetVariantById(variantId);
-            if (variant == null) return;
-            var line = CartItems.Where(x => x.Id == variant.Id).FirstOrDefault();
-            if (line == null) { App.Alerts.ShowAlert("Cart Error", $"Failed to remove card id: {variant.Id}"); return; }
+            var line = CartItems.Where(x => x.Id == variantId).FirstOrDefault();
+            if (line == null) { App.Alerts.ShowAlert("Cart Error", $"Failed to remove card id: {variantId}"); return; }
             CartItems.Remove(line);
             RecalculateCart();
         }
@@ -241,11 +232,25 @@ namespace CardPilkApp.ViewModels
             return true;
         }
 
-        private CardVariantDO? GetVariantById(int variantId) => Listings
-            .Where(x => x.Id == variantId)
-            .FirstOrDefault()?
-            .Variants.Where(x => x.Id == variantId)
-            .FirstOrDefault();
+        private async Task<CardVariantDO?> GetVariantById(int variantId)
+        {
+            CardListing? variant = await manager.GetListingById(variantId);
+            if (variant == null) return null;
+            TCGMarketPriceHistory pricing = await manager.GetNewestPrices(variant.TCGplayerId);
+            return new CardVariantDO()
+            {
+                Id = variant.Id,
+                TCGplayerId = variant.TCGplayerId,
+                Condition = Conditions.Where(c => c.Id == variant.ConditionId).First(),
+                TotalQuantity = variant.TotalQuantity,
+                Price = variant.Price,
+                PriceString = variant.Price.ToString("$0.00"),
+                TCGMarket = fmtPrice(pricing.TCGMarketPrice),
+                TCGLow = fmtPrice(pricing.TCGLowPrice),
+                TCGShippedLow = fmtPrice(pricing.TCGLowPriceWithShipping),
+                TCGDirectLow = fmtPrice(pricing.TCGDirectLow),
+            };
+        }
         private void RecalculateCart()
         {
             int q = CartItems.Sum(x => x.Quantity);
@@ -262,7 +267,7 @@ namespace CardPilkApp.ViewModels
             if (!CardManager.Pricers.Contains(basepricer)) return false;
             if (percent <= 0 || minPrice <= 0) return false;
             RepricerUpdate res = await manager.RepriceCards(includeOOS, basepricer, percent, minPrice);
-            await RefreshListings();
+            Search();
             return res.PricesChanged > 0;
         }
 

@@ -2,6 +2,7 @@
 using CardCondition = CardLib.Models.Condition;
 using SQLite;
 using System.Diagnostics;
+using System.Linq.Expressions;
 
 namespace CardLib
 {
@@ -197,6 +198,11 @@ namespace CardLib
         #endregion
 
         #region Getters
+        public async Task<IEnumerable<CardListing>> FilterListings(Expression<Func<CardListing, bool>> expression, int limit)
+        {
+            return await _connection.Table<CardListing>().Where(expression).Take(limit).ToListAsync();
+        }
+
         private async Task<CardListing?> GetCardListingByTCGId(int id)
         {
             return await _connection.Table<CardListing>().Where(x => x.TCGplayerId == id).FirstOrDefaultAsync();
@@ -234,6 +240,11 @@ namespace CardLib
                 .OrderBy(x => x.Name)
                 .Where(x => x.Name.ToUpper().Contains(searchText.ToUpper()))
                 .ToListAsync();
+        }
+
+        public async Task<CardListing?> GetListingById(int id)
+        {
+            return await _connection.Table<CardListing>().FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<IEnumerable<ProductLine>> GetProductLines()
@@ -344,6 +355,11 @@ namespace CardLib
             }
             await _connection.InsertAsync(update);
             return update;
+        }
+
+        public AsyncTableQuery<CardListing> QueryCardListings()
+        {
+            return _connection.Table<CardListing>();
         }
     }
 

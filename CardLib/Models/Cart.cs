@@ -10,6 +10,7 @@ namespace CardLib.Models
         public int Id { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public int NumLines { get; set; }
+        public int TotalQuantity { get; set; }
         public decimal Subtotal { get; set; }
         public string Data { get; set; } // JSON Serialized CartData
 
@@ -17,6 +18,7 @@ namespace CardLib.Models
         {
             if (!data.Validate()) return false;
             Subtotal = data.LineItems.Sum(x => x.Subtotal);
+            TotalQuantity = data.LineItems.Sum(x => x.Quantity);
             NumLines = data.LineItems.Length;
             Data = JsonSerializer.Serialize(data);
             return true;

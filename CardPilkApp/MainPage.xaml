@@ -186,7 +186,7 @@
             </Grid.RowDefinitions>
             <Label Text="Cart"
                    Style="{StaticResource Headline}"/>
-            <ScrollView VerticalOptions="Fill" Background="{StaticResource Gray600}" Grid.Row="1">
+            <ScrollView x:Name="CartScrollView" VerticalOptions="Fill" Background="{StaticResource Gray600}" Grid.Row="1">
                 <ListView ItemsSource="{Binding CartItems}"
                       RowHeight="135">
                     <ListView.ItemTemplate>
