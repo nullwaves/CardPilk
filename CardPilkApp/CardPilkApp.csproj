@@ -56,14 +56,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="Resources\Images\file_add.svg" />
+	  <None Remove="Resources\Images\file_output.svg" />
 	  <None Remove="Resources\Images\history.svg" />
 	  <None Remove="Resources\Images\minus.svg" />
 	  <None Remove="Resources\Images\plus.svg" />
 	  <None Remove="Resources\Images\save.svg" />
+	  <None Remove="Resources\Images\shopping_cart.svg" />
 	  <None Remove="Resources\Images\tag.svg" />
 	  <None Remove="Resources\Images\trash.svg" />
 	  <None Remove="Resources\Images\upload.svg" />
+	  <None Remove="Resources\Images\x.svg" />
 	</ItemGroup>
 
 	<ItemGroup>

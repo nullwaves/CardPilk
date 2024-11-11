@@ -159,7 +159,7 @@
                                                      CommandParameter="{Binding SelectedVariant}"
                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CardListViewModel}}, Path=AddToCartCommand}"
                                                      Clicked="VariantPicker_Clicked"
-                                                     Source="file_add.png"
+                                                     Source="shopping_cart.png"
                                                      BackgroundColor="LightGreen">
                                         </ImageButton>
                                     </HorizontalStackLayout>
