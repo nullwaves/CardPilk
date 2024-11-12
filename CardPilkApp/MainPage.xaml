@@ -235,12 +235,12 @@
                 <Label Text="{Binding CartCountString}" HorizontalOptions="Start" WidthRequest="200" VerticalOptions="Center" Padding="10"/>
                 <Label Text="{Binding CartSubtotalString}" HorizontalTextAlignment="End" WidthRequest="200" VerticalOptions="Center" Padding="10"/>
             </FlexLayout>
-            <FlexLayout Grid.Row="3" HorizontalOptions="Center">
-                <ImageButton Source="history.png" Clicked="CartHistory_Clicked" HeightRequest="30" BackgroundColor="{StaticResource PrimaryDark}">
-                </ImageButton>
-                <ImageButton Source="save.png" Clicked="SaveCart_Clicked" HeightRequest="30" BackgroundColor="{StaticResource PrimaryDark}">
-                </ImageButton>
-            </FlexLayout>
+            <HorizontalStackLayout Grid.Row="3" HorizontalOptions="Center" Spacing="10">
+                <ImageButton Source="history.png" Clicked="CartHistory_Clicked" HeightRequest="30" BackgroundColor="{StaticResource PrimaryDark}" />
+                <ImageButton Source="save.png" Clicked="SaveCart_Clicked" HeightRequest="30" BackgroundColor="{StaticResource PrimaryDark}" />
+                <ImageButton Source="trash.png" Command="{Binding ClearCartCommand}" HeightRequest="30" BackgroundColor="{StaticResource PrimaryDark}" />
+                
+            </HorizontalStackLayout>
         </Grid>
     </Grid>
 

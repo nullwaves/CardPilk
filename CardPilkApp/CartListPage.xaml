@@ -11,7 +11,7 @@
         <Grid Margin="20,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="170"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="50"/>
                 <ColumnDefinition Width="80"/>
@@ -24,53 +24,51 @@
             <Label Text="Subtotal" Grid.Column="4"/>
             <Label Text="Actions" Grid.Column="5"/>
         </Grid>
-        <ListView ItemsSource="{Binding Carts}" Margin="10">
-            <ListView.ItemTemplate>
+        <CollectionView ItemsSource="{Binding Carts}" Margin="20,0">
+            <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="dao:CartDO">
-                    <ViewCell>
-                        <Grid Margin="10">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="50"/>
-                                <ColumnDefinition Width="80"/>
-                                <ColumnDefinition Width="130"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Text="{Binding Id}" />
-                            <Label Text="{Binding CreatedAt}" Grid.Column="1"/>
-                            <ListView ItemsSource="{Binding Lines}" Grid.Column="2" VerticalOptions="StartAndExpand" MaximumHeightRequest="150">
-                                <ListView.ItemTemplate>
-                                    <DataTemplate x:DataType="dao:CartLineItemDO">
-                                        <ViewCell>
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="40" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="200" />
-                                                    <ColumnDefinition Width="40" />
-                                                    <ColumnDefinition Width="80" />
-                                                </Grid.ColumnDefinitions>
-                                                <Label Text="{Binding Id}"/>
-                                                <Label Text="{Binding Name}" Grid.Column="1" LineBreakMode="TailTruncation"/>
-                                                <Label Text="{Binding Condition}" Grid.Column="2" LineBreakMode="TailTruncation"/>
-                                                <Label Text="{Binding Quantity}" Grid.Column="3"/>
-                                                <Label Text="{Binding PriceString}" Grid.Column="4"/>
-                                            </Grid>
-                                        </ViewCell>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
-                            <Label Text="{Binding TotalQuantity}" Grid.Column="3"/>
-                            <Label Text="{Binding SubtotalString}" Grid.Column="4"/>
-                            <HorizontalStackLayout Grid.Column="5" Spacing="10">
-                                <ImageButton Source="file_output.png" Background="CornflowerBlue"/>
-                                <ImageButton Source="x.png" Background="IndianRed"/>
-                            </HorizontalStackLayout>
-                        </Grid>
-                    </ViewCell>
+                    <Grid MinimumHeightRequest="70">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="130"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Text="{Binding Id}" />
+                        <Label Text="{Binding CreatedAt}" Grid.Column="1"/>
+                        <ListView ItemsSource="{Binding Lines}" Grid.Column="2" VerticalOptions="StartAndExpand" MaximumHeightRequest="50">
+                            <ListView.ItemTemplate>
+                                <DataTemplate x:DataType="dao:CartLineItemDO">
+                                    <ViewCell>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="40" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="200" />
+                                                <ColumnDefinition Width="40" />
+                                                <ColumnDefinition Width="80" />
+                                            </Grid.ColumnDefinitions>
+                                            <Label Text="{Binding Id}"/>
+                                            <Label Text="{Binding Name}" Grid.Column="1" LineBreakMode="TailTruncation"/>
+                                            <Label Text="{Binding Condition}" Grid.Column="2" LineBreakMode="TailTruncation"/>
+                                            <Label Text="{Binding Quantity}" Grid.Column="3"/>
+                                            <Label Text="{Binding PriceString}" Grid.Column="4"/>
+                                        </Grid>
+                                    </ViewCell>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <Label Text="{Binding TotalQuantity}" Grid.Column="3"/>
+                        <Label Text="{Binding SubtotalString}" Grid.Column="4"/>
+                        <HorizontalStackLayout Grid.Column="5" Spacing="10">
+                            <ImageButton Source="file_output.png" Background="CornflowerBlue" HeightRequest="20" WidthRequest="20"/>
+                            <ImageButton Source="x.png" Background="IndianRed" HeightRequest="20" WidthRequest="20"/>
+                        </HorizontalStackLayout>
+                    </Grid>
                 </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </VerticalStackLayout>
 </ContentPage>

@@ -46,6 +46,7 @@ namespace CardPilkApp.ViewModels
             SearchText = string.Empty;
             CartItems = [];
             this.manager = manager;
+            ResetFilters();
         }
 
         internal static string fmtPrice(decimal price)
@@ -53,9 +54,8 @@ namespace CardPilkApp.ViewModels
             return price.ToString("$0.00").Replace("$0.00", "--");
         }
 
-        internal async Task PopulateListings(IEnumerable<CardListing> newListings)
+        internal async void ResetFilters()
         {
-            Listings.Clear();
             var lines = await manager.GetProductLines();
             ProductLines.Clear();
             ProductLines.Add(NoProductFilter);
@@ -77,6 +77,11 @@ namespace CardPilkApp.ViewModels
             Conditions.Add(NoConditionFilter);
             FilterByCondition = NoConditionFilter;
             foreach (var c in conds) Conditions.Add(c);
+        }
+
+        internal async Task PopulateListings(IEnumerable<CardListing> newListings)
+        {
+            Listings.Clear();
             var raritys = await manager.GetRarities();
             foreach (CardListing l in newListings.OrderByDescending(x => x.Price).DistinctBy(x => x.Name))
             {
@@ -84,8 +89,8 @@ namespace CardPilkApp.ViewModels
                 {
                     Id = l.Id,
                     TCGplayerId = l.TCGplayerId,
-                    ProductLine = lines.Where(x => x.Id == l.ProductLineId).First(),
-                    Set = sets.Where(x => x.Id == l.SetId).First(),
+                    ProductLine = ProductLines.Where(x => x.Id == l.ProductLineId).First(),
+                    Set = Sets.Where(x => x.Id == l.SetId).First(),
                     Name = l.Name,
                     CardNumber = l.CardNumber,
                     Rarity = raritys.Where(x => x.Id == l.RarityId).First(),
@@ -99,7 +104,7 @@ namespace CardPilkApp.ViewModels
                     {
                         Id = variant.Id,
                         TCGplayerId = variant.TCGplayerId,
-                        Condition = conds.Where(c => c.Id == variant.ConditionId).First(),
+                        Condition = Conditions.Where(c => c.Id == variant.ConditionId).First(),
                         TotalQuantity = variant.TotalQuantity,
                         Price = variant.Price,
                         PriceString = variant.Price.ToString("$0.00"),
@@ -204,6 +209,17 @@ namespace CardPilkApp.ViewModels
             if (line == null) { App.Alerts.ShowAlert("Cart Error", $"Failed to remove card id: {variantId}"); return; }
             CartItems.Remove(line);
             RecalculateCart();
+        }
+
+        [RelayCommand]
+        internal async Task ClearCart()
+        {
+            var ans = await App.Alerts.ShowConfirmationAsync("CardPilk Cart", "Clear cart?");
+            if (ans)
+            {
+                CartItems.Clear();
+                RecalculateCart();
+            }
         }
 
         internal bool AddOneToCart(CardVariantDO card)

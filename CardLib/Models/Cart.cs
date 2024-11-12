@@ -7,7 +7,7 @@ namespace CardLib.Models
     public class Cart
     {
         [PrimaryKey]
-        public int Id { get; set; }
+        public int Id { get; set; } = -1;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public int NumLines { get; set; }
         public int TotalQuantity { get; set; }

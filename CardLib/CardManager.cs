@@ -285,7 +285,9 @@ namespace CardLib
 
         public async Task<int> UpsertCart(Cart cart)
         {
-            return await _connection.InsertOrReplaceAsync(cart);
+            if (cart.Id < 0)
+                return await _connection.InsertAsync(cart);
+            return await _connection.UpdateAsync(cart);
         }
 
         public async Task<RepricerUpdate> RepriceCards(bool includeOOS, string basepricer, decimal percent, decimal minPrice)

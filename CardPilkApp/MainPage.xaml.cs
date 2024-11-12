@@ -43,12 +43,13 @@ namespace CardPilkApp
             resstr.AppendLine($"Created Prices: {ures.CreatedPrices}");
             resstr.AppendLine($"Updated Qtys: {ures.UpdatedQuantities}");
             await DisplayAlert("TCGplayer Import", resstr.ToString(), "Done");
+            _viewmodel.ResetFilters();
             _viewmodel.Search();
         }
 
         private void SearchInput_Completed(object sender, EventArgs e)
         {
-            _viewmodel.Search();
+            _viewmodel.ExecuteSearch();
         }
 
         private void ToggleInStockOnly(object sender, CheckedChangedEventArgs e)
@@ -61,7 +62,7 @@ namespace CardPilkApp
             if (sender is Picker p && p.SelectedIndex != -1)
             {
                 _viewmodel.MaxListings = _viewmodel.MaxListingsOptions[p.SelectedIndex];
-                _viewmodel.ExecuteSearch();
+                _viewmodel.Search();
             }
         }
 
@@ -88,9 +89,8 @@ namespace CardPilkApp
             }
         }
 
-        private async void VariantPicker_Clicked(object sender, EventArgs e)
+        private void VariantPicker_Clicked(object sender, EventArgs e)
         {
-            await CartScrollView.ScrollToAsync(0,int.MaxValue, true);
             SearchInput.Focus();
             SearchInput.CursorPosition = 0;
             SearchInput.SelectionLength = SearchInput.Text.Length;
