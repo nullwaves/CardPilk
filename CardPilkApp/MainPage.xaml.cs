@@ -98,18 +98,7 @@ namespace CardPilkApp
 
         private async void OnRepricerClicked(object sender, EventArgs e)
         {
-            string[] pricers = ["Low", "Market", "Shipped Low", "Direct Low"];
-            string basepricer = await DisplayActionSheet("Choose Base Price", "Cancel", null, pricers);
-            int priceIndex = Array.IndexOf(pricers, basepricer);
-            if (priceIndex < 0 || priceIndex >= pricers.Length) return;
-            string percentstring = await DisplayPromptAsync("Repricer Tool", "Percentage of Base Price", initialValue: "100");
-            decimal percent;
-            if (!decimal.TryParse(percentstring, out percent)) { await DisplayAlert("Repricer Tool", "Invalid Percentage Entered.", "OK"); return; }
-            string minimumPriceString = await DisplayPromptAsync("Repricer Tool", "Minimum Allowed Price", initialValue: "0.10");
-            decimal minPrice;
-            if (!decimal.TryParse(minimumPriceString, out minPrice)) { await DisplayAlert("Repricer Tool", "Invalid Minimum Price Entered.", "OK"); return; }
-            bool includeOOS = await DisplayActionSheet("Include Out of Stock?", "No", null, ["Yes"]) == "Yes";
-            await _viewmodel.RepriceCards(basepricer, percent, minPrice, includeOOS);
+            await Shell.Current.GoToAsync("/Repricer");
         }
 
         private async void SaveCart_Clicked(object sender, EventArgs e)

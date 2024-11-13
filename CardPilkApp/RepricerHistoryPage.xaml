@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CardPilkApp.RepricerHistoryPage"
+             xmlns:models="clr-namespace:CardLib.Models;assembly=CardLib"
+             xmlns:dao="clr-namespace:CardPilkApp.DataObjects"
+             xmlns:viewmodel="clr-namespace:CardPilkApp.ViewModels"
+             x:DataType="viewmodel:RepricerHistoryViewModel"
+             Title="Repricer History">
+    <VerticalStackLayout>
+        <HorizontalStackLayout HorizontalOptions="Center" Margin="20,0,20,20" Spacing="20">
+            <Label Text="Base Price:" VerticalOptions="Center"/>
+            <Picker x:Name="BasePricePicker" ItemsSource="{Binding BasePricers}" SelectedIndex="{Binding SelectedPricerIndex}" MinimumWidthRequest="200" VerticalOptions="Center"/>
+            <Label Text="Percentage:" VerticalOptions="Center"/>
+            <Entry Text="{Binding PercentageEntry}" MinimumWidthRequest="100" VerticalOptions="Center"/>
+            <Label Text="Min. Price:" VerticalOptions="Center"/>
+            <Entry Text="{Binding MinPriceEntry}" MinimumWidthRequest="100" VerticalOptions="Center"/>
+            <Label Text="Include Out of Stock:" VerticalOptions="Center"/>
+            <CheckBox IsChecked="{Binding IncludeOOS}" VerticalOptions="Center"/>
+            <Button Text="Run Repricer" Command="{Binding RunRepricerCommand}"/>
+        </HorizontalStackLayout>
+        <Grid Margin="20,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="170"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="80"/>
+                <ColumnDefinition Width="50"/>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="90"/>
+                <ColumnDefinition Width="130"/>
+            </Grid.ColumnDefinitions>
+            <Label Text="Id"/>
+            <Label Text="Created" Grid.Column="1"/>
+            <Label Text="Base Price" Grid.Column="2"/>
+            <Label Text="%" Grid.Column="3"/>
+            <Label Text="Min $" Grid.Column="4"/>
+            <Label Text="All Cards" Grid.Column="5"/>
+            <Label Text="# Changes" Grid.Column="6"/>
+            <Label Text="Gross" Grid.Column="7"/>
+            <Label Text="Net" Grid.Column="8"/>
+            <Label Text="Actions" Grid.Column="9"/>
+        </Grid>
+        <CollectionView ItemsSource="{Binding Updates}"  Margin="20,0">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="dao:RepricerUpdateDO">
+                    <Grid MinimumHeightRequest="70" VerticalOptions="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="170"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="130"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Text="{Binding Id}" VerticalOptions="Center"/>
+                        <Label Text="{Binding CreatedAt}" Grid.Column="1" VerticalOptions="Center"/>
+                        <Label Text="{Binding BasePrice}" Grid.Column="2" VerticalOptions="Center"/>
+                        <Label Text="{Binding PercentageString}" Grid.Column="3" VerticalOptions="Center"/>
+                        <Label Text="{Binding MinimumPriceString}" Grid.Column="4" VerticalOptions="Center"/>
+                        <Label Text="{Binding RunAgainstAllCards}" Grid.Column="5" VerticalOptions="Center"/>
+                        <Label Text="{Binding PricesChanged}" Grid.Column="6" VerticalOptions="Center"/>
+                        <Label Text="{Binding GrossChangeString}" Grid.Column="7" VerticalOptions="Center"/>
+                        <Label Text="{Binding NetChangeString}" Grid.Column="8" VerticalOptions="Center"/>
+                        <HorizontalStackLayout Grid.Column="9" Spacing="10" VerticalOptions="Center">
+                            <ImageButton Source="file_output.png" Background="CornflowerBlue" HeightRequest="20" WidthRequest="20"
+                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CartListViewModel}}, Path=ExportCartCommand}"
+                                         CommandParameter="{Binding .}"/>
+                            <ImageButton Source="x.png" Background="IndianRed" HeightRequest="20" WidthRequest="20"
+                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CartListViewModel}}, Path=DeleteCartCommand}"
+                                         CommandParameter="{Binding .}"/>
+                        </HorizontalStackLayout>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentPage>

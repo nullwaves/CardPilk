@@ -387,7 +387,8 @@ namespace CardLib
                 Dictionary<int, CardCondition> conditions = new();
                 Dictionary<int, Rarity> raritys = new();
                 StringBuilder sb = new(string.Join(',', TCGplayerHeaders.Select(x => $"\"{x}\"")));
-                async Task<string> getProductLineName(int id) { 
+                async Task<string> getProductLineName(int id)
+                {
                     if (!products.ContainsKey(id))
                     {
                         products[id] = await _connection.Table<ProductLine>().FirstAsync(x => x.Id == id);
@@ -456,6 +457,11 @@ namespace CardLib
             object[] args = { id };
             var mapping = await _connection.GetMappingAsync<Set>();
             return await _connection.QueryAsync<Set>(query, args);
+        }
+
+        public async Task<IEnumerable<RepricerUpdate>> GetRepricerUpdates(int limit)
+        {
+            return await _connection.Table<RepricerUpdate>().OrderByDescending(x => x.CreatedAt).Take(limit).ToListAsync();
         }
         #endregion
     }

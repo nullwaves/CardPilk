@@ -6,6 +6,7 @@
         {
             InitializeComponent();
             Routing.RegisterRoute("/Carts", typeof(CartListPage));
+            Routing.RegisterRoute("/Repricer", typeof(RepricerHistoryPage));
         }
     }
 }

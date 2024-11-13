@@ -84,6 +84,9 @@
 	  <MauiXaml Update="CartListPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="RepricerHistoryPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Resources\Styles\Card.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

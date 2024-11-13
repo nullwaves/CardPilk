@@ -263,6 +263,7 @@ namespace CardPilkApp.ViewModels
                 TCGDirectLow = fmtPrice(pricing.TCGDirectLow),
             };
         }
+
         private void RecalculateCart()
         {
             int q = CartItems.Sum(x => x.Quantity);
@@ -273,15 +274,6 @@ namespace CardPilkApp.ViewModels
         }
 
         public static string[] Pricers = ["Low", "Market", "Shipped Low", "Direct Low"];
-
-        internal async Task<bool> RepriceCards(string basepricer, decimal percent, decimal minPrice, bool includeOOS)
-        {
-            if (!CardManager.Pricers.Contains(basepricer)) return false;
-            if (percent <= 0 || minPrice <= 0) return false;
-            RepricerUpdate res = await manager.RepriceCards(includeOOS, basepricer, percent, minPrice);
-            Search();
-            return res.PricesChanged > 0;
-        }
 
         public async Task<int> SaveCart()
         {
