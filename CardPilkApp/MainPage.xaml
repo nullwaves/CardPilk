@@ -54,11 +54,11 @@
                 </HorizontalStackLayout>
                 <HorizontalStackLayout Margin="20,0">
                     <Label Text="Set:" VerticalOptions="CenterAndExpand" />
-                    <Picker x:Name="FilterSetPicker" ItemsSource="{Binding Sets}" Margin="10, 0" SelectedItem="{Binding FilterBySet}" SelectedIndex="{Binding FilterBySetIndex}" SelectedIndexChanged="SearchInput_Completed" />
+                    <Picker x:Name="FilterSetPicker" ItemsSource="{Binding Sets}" Margin="10, 0" SelectedItem="{Binding FilterBySet}" SelectedIndex="{Binding FilterBySetIndex}"/>
                 </HorizontalStackLayout>
                 <HorizontalStackLayout Margin="20,0">
                     <Label Text="Condition:" VerticalOptions="CenterAndExpand" />
-                    <Picker x:Name="FilterConditionPicker" ItemsSource="{Binding Conditions}" Margin="10, 0" SelectedItem="{Binding FilterByCondition}" SelectedIndexChanged="SearchInput_Completed" />
+                    <Picker x:Name="FilterConditionPicker" ItemsSource="{Binding Conditions}" Margin="10, 0" SelectedItem="{Binding FilterByCondition}"/>
                 </HorizontalStackLayout>
             </FlexLayout>
         </VerticalStackLayout>
@@ -218,7 +218,7 @@
                                             <ImageButton Source="trash.png"
                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CardListViewModel}}, Path=RemoveFromCartByIdCommand}"
                                                      CommandParameter="{Binding Id}"
-                                                     BackgroundColor="DarkMagenta">
+                                                     BackgroundColor="IndianRed">
                                                 <ImageButton.Behaviors>
                                                     <toolkit:IconTintColorBehavior TintColor="{StaticResource Secondary}"/>
                                                 </ImageButton.Behaviors>
@@ -236,9 +236,9 @@
                 <Label Text="{Binding CartSubtotalString}" HorizontalTextAlignment="End" WidthRequest="200" VerticalOptions="Center" Padding="10"/>
             </FlexLayout>
             <HorizontalStackLayout Grid.Row="3" HorizontalOptions="Center" Spacing="10">
-                <ImageButton Source="history.png" Clicked="CartHistory_Clicked" HeightRequest="30" BackgroundColor="{StaticResource PrimaryDark}" />
-                <ImageButton Source="save.png" Clicked="SaveCart_Clicked" HeightRequest="30" BackgroundColor="{StaticResource PrimaryDark}" />
-                <ImageButton Source="trash.png" Command="{Binding ClearCartCommand}" HeightRequest="30" BackgroundColor="{StaticResource PrimaryDark}" />
+                <ImageButton Source="history.png" Clicked="CartHistory_Clicked" HeightRequest="30" BackgroundColor="CornflowerBlue" />
+                <ImageButton Source="save.png" Clicked="SaveCart_Clicked" HeightRequest="30" BackgroundColor="Goldenrod" />
+                <ImageButton Source="trash.png" Command="{Binding ClearCartCommand}" HeightRequest="30" BackgroundColor="IndianRed" />
                 
             </HorizontalStackLayout>
         </Grid>

@@ -9,7 +9,7 @@ namespace CardPilkApp.DataObjects
         public int NumLines { get; set; }
         public int TotalQuantity { get; set; }
         public decimal Subtotal { get; set; }
-        public List<CartLineItemDO> Lines { get; set; }
+        public List<CartLineItemDO> Lines { get; set; } = new();
 
         public string SubtotalString => Subtotal.ToString("$0.00");
     }

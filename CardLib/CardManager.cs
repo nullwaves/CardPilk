@@ -3,6 +3,7 @@ using CardCondition = CardLib.Models.Condition;
 using SQLite;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Text;
 
 namespace CardLib
 {
@@ -290,6 +291,16 @@ namespace CardLib
             return await _connection.UpdateAsync(cart);
         }
 
+        public async Task<int> DeleteCart(Cart cart)
+        {
+            return await _connection.DeleteAsync(cart);
+        }
+
+        public AsyncTableQuery<Cart> QueryCarts()
+        {
+            return _connection.Table<Cart>();
+        }
+
         public async Task<RepricerUpdate> RepriceCards(bool includeOOS, string basepricer, decimal percent, decimal minPrice)
         {
             percent = percent / 100;
@@ -363,6 +374,90 @@ namespace CardLib
         {
             return _connection.Table<CardListing>();
         }
+
+        #region Export Fns
+        public async Task<Stream?> CreateCSVFromCart(int id)
+        {
+            if (await _connection.Table<Cart>().FirstOrDefaultAsync(x => x.Id == id) is Cart cart)
+            {
+                CartLineItem[] lines = cart.GetLines();
+                List<TCGplayerIOItem> outlines = new();
+                Dictionary<int, ProductLine> products = new();
+                Dictionary<int, Set> sets = new();
+                Dictionary<int, CardCondition> conditions = new();
+                Dictionary<int, Rarity> raritys = new();
+                StringBuilder sb = new(string.Join(',', TCGplayerHeaders.Select(x => $"\"{x}\"")));
+                async Task<string> getProductLineName(int id) { 
+                    if (!products.ContainsKey(id))
+                    {
+                        products[id] = await _connection.Table<ProductLine>().FirstAsync(x => x.Id == id);
+                    }
+                    return products[id].Name;
+                };
+                async Task<string> getSetName(int id)
+                {
+                    if (!sets.ContainsKey(id))
+                    {
+                        sets[id] = await _connection.Table<Set>().FirstAsync(x => x.Id == id);
+                    }
+                    return sets[id].Name;
+                };
+                async Task<string> getConditionName(int id)
+                {
+                    if (!conditions.ContainsKey(id))
+                    {
+                        conditions[id] = await _connection.Table<CardCondition>().FirstAsync(x => x.Id == id);
+                    }
+                    return conditions[id].Name;
+                };
+                async Task<string> getRarityName(int id)
+                {
+                    if (!raritys.ContainsKey(id))
+                    {
+                        raritys[id] = await _connection.Table<Rarity>().FirstAsync(x => x.Id == id);
+                    }
+                    return raritys[id].Name;
+                };
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    CartLineItem line = lines[i];
+                    CardListing? listing = await GetListingById(line.CardId);
+                    if (listing == null) { throw new Exception($"Database Integrity Exception: Could not locate card '{line.CardId}' refrenced in cart '{cart.Id}'."); }
+                    TCGMarketPriceHistory prices = await GetNewestPrices(listing.TCGplayerId);
+                    outlines.Add(new TCGplayerIOItem()
+                    {
+                        TCGplayerId = listing.TCGplayerId,
+                        ProductLine = await getProductLineName(listing.ProductLineId),
+                        SetName = await getSetName(listing.SetId),
+                        ProductName = listing.Name,
+                        Title = "",
+                        CardNumber = listing.CardNumber,
+                        Rarity = await getRarityName(listing.RarityId),
+                        Condition = await getConditionName(listing.ConditionId),
+                        TCGMarketPrice = prices.TCGMarketPrice.ToString("0.00"),
+                        TCGDirectLow = prices.TCGDirectLow.ToString("0.00"),
+                        TCGLowPriceWithShipping = prices.TCGLowPriceWithShipping.ToString("9.00"),
+                        TCGLowPrice = prices.TCGLowPrice.ToString("0.00"),
+                        TotalQuantity = listing.TotalQuantity.ToString(),
+                        AddtoQuantity = line.Quantity.ToString(),
+                        TCGMarketplacePrice = listing.Price.ToString("0.00"),
+                        PhotoURL = ""
+                    });
+                    sb.Append($"\n{outlines[i].ToCSV()}");
+                }
+                return new MemoryStream(Encoding.Default.GetBytes(sb.ToString()));
+            }
+            else { return null; }
+        }
+
+        public async Task<IEnumerable<Set>> GetSetsFromProductLineId(int id)
+        {
+            string query = $"SELECT * FROM `Set` WHERE Id IN (SELECT SetId FROM CardListing WHERE ProductLineId=?);";
+            object[] args = { id };
+            var mapping = await _connection.GetMappingAsync<Set>();
+            return await _connection.QueryAsync<Set>(query, args);
+        }
+        #endregion
     }
 
     public class TCGplayerImportResult

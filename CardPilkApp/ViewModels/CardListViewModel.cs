@@ -118,7 +118,7 @@ namespace CardPilkApp.ViewModels
             }
         }
 
-        internal void UpdateSetsFilter()
+        internal async void UpdateSetsFilter()
         {
             var oldsetfid = FilterBySet?.Id;
             Sets.Clear();
@@ -127,15 +127,11 @@ namespace CardPilkApp.ViewModels
             List<Set> lsets;
             if (line?.Id > -1)
             {
-                lsets = Listings
-                    .Where(x => x.ProductLine.Id == FilterByProductLine.Id)
-                    .DistinctBy(x => x.Set.Id)
-                    .Select(x => x.Set)
-                    .ToList();
+                lsets = (await manager.GetSetsFromProductLineId(line.Id)).ToList();
             }
             else
             {
-                lsets = Listings.DistinctBy(x => x.Set.Id).Select(x => x.Set).ToList();
+                lsets = (await manager.GetSets()).ToList();
             }
             foreach (Set s in lsets) Sets.Add(s);
             if (oldsetfid is int fid && lsets.Where(x => x.Id == fid).FirstOrDefault() is Set newsetf)

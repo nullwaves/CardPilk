@@ -32,5 +32,14 @@
                 PhotoURL = split[15]
             };
         }
+
+        /// <summary>
+        /// Format Item as CSV line without any newlines
+        /// </summary>
+        /// <returns>16-column CSV Formatted string</returns>
+        public string ToCSV()
+        {
+            return $"\"{TCGplayerId}\",\"{ProductLine}\",\"{SetName}\",\"{ProductName}\",\"{Title}\",\"{CardNumber}\",\"{Rarity}\",\"{Condition}\",\"{TCGMarketPrice}\",\"{TCGDirectLow}\",\"{TCGLowPriceWithShipping}\",\"{TCGLowPrice}\",\"{TotalQuantity}\",\"{AddtoQuantity}\",\"{TCGMarketplacePrice}\",\"{PhotoURL}\"";
+        }
     }
 }
