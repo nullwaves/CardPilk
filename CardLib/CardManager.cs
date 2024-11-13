@@ -55,6 +55,7 @@ namespace CardLib
                     typeof(TCGMarketPriceHistory),
                     typeof(RepricerUpdate),
                     typeof(Cart),
+                    typeof(ImportBatch),
                 ]
             );
             foreach (var item in res.Results.Keys)
@@ -64,14 +65,14 @@ namespace CardLib
         }
 
         #region TCGImport
-        public async Task<TCGplayerImportResult> ImportFromTCGplayer(FileResult file)
+        public async Task<ImportBatch?> ImportFromTCGplayer(FileResult file)
         {
             Stream fs = await file.OpenReadAsync();
             string headerLn = fs.Readln();
             var headers = headerLn.SplitCSV();
 
             if (!ValidateHeaders(headers))
-                return TCGplayerImportResult.InvalidHeaders;
+                return null;
             List<TCGplayerIOItem> items = new();
             int invalidLines = 0;
             while (fs.Position < fs.Length - 1)
@@ -87,7 +88,31 @@ namespace CardLib
                     invalidLines++;
                 }
             }
-            return new TCGplayerImportResult(items.ToArray(), invalidLines);
+            // Do not return here, remove the check logic from viewmodel and call
+            // upsert here, returning an updated ImportBatch instead
+            TCGplayerUpsertResult ures = await UpsertTCGplayerRows(items);
+            int[] tcgids = items.Select(x => x.TCGplayerId).ToArray();
+            int[] batchItems = (await _connection.Table<CardListing>().Where(x => tcgids.Contains(x.TCGplayerId)).ToListAsync()).Select(x => x.Id).ToArray();
+            ImportBatch batch = new()
+            {
+                ImportSource = "TCGplayer",
+                InvalidRows = invalidLines,
+                CreatedCards = ures.CreatedCards,
+                CreatedPrices = ures.CreatedPrices,
+                CreatedConditions = ures.CreatedConditions,
+                CreatedProductLines = ures.CreatedProductLines,
+                CreatedRarities = ures.CreatedRarities,
+                CreatedSets = ures.CreatedSets,
+                UpdatedQuantities = ures.UpdatedQuantities,
+            };
+            batch.SetItems(batchItems);
+            int res = await _connection.InsertAsync(batch);
+            if (res < 1)
+            {
+                Debug.WriteLine("Error saving Import Batch");
+                if(Debugger.IsAttached) Debugger.Break();
+            }
+            return batch;
         }
 
         public async Task<TCGplayerUpsertResult> UpsertTCGplayerRows(IEnumerable<TCGplayerIOItem> items)
@@ -337,6 +362,7 @@ namespace CardLib
                             refPrice = refPrices.TCGMarketPrice; break;
                     }
                     decimal newPrice = Math.Round(refPrice * percent, 2);
+                    if (newPrice < minPrice) newPrice = minPrice;
                     if (newPrice != oldPrice)
                     {
                         var change = new RepricerChange
@@ -345,7 +371,6 @@ namespace CardLib
                             Old = oldPrice,
                             Delta = newPrice - oldPrice
                         };
-                        if (newPrice < minPrice) newPrice = minPrice;
                         changes.Add(change);
                         toUpdate[i].Price = newPrice;
                         update.PricesChanged++;
@@ -376,11 +401,31 @@ namespace CardLib
         }
 
         #region Export Fns
+
         public async Task<Stream?> CreateCSVFromCart(int id)
         {
             if (await _connection.Table<Cart>().FirstOrDefaultAsync(x => x.Id == id) is Cart cart)
             {
                 CartLineItem[] lines = cart.GetLines();
+                var ids = lines.Select(x => x.CardId).ToArray();
+                var quants = lines.Select(x => (x.CardId, x.Quantity)).ToDict();
+                return await CreateCSV(ids, quants);
+            }
+            return null;
+        }
+
+        public async Task<Stream?> CreateCSVFromRepricerUpdate(int id)
+        {
+            if (await _connection.Table<RepricerUpdate>().FirstOrDefaultAsync(x => x.Id == id) is RepricerUpdate update)
+            {
+                var ids = update.GetChanges().Select(x => x.CardId).ToArray();
+                return await CreateCSV(ids);
+            }
+            return null;
+        }
+
+        public async Task<Stream?> CreateCSV(int[] ids, Dictionary<int, int>? newQuantities = null)
+        {
                 List<TCGplayerIOItem> outlines = new();
                 Dictionary<int, ProductLine> products = new();
                 Dictionary<int, Set> sets = new();
@@ -419,11 +464,10 @@ namespace CardLib
                     }
                     return raritys[id].Name;
                 };
-                for (int i = 0; i < lines.Length; i++)
+                for (int i = 0; i < ids.Length; i++)
                 {
-                    CartLineItem line = lines[i];
-                    CardListing? listing = await GetListingById(line.CardId);
-                    if (listing == null) { throw new Exception($"Database Integrity Exception: Could not locate card '{line.CardId}' refrenced in cart '{cart.Id}'."); }
+                    CardListing? listing = await GetListingById(ids[i]);
+                    if (listing == null) { throw new Exception($"Database Integrity Exception: Could not locate card '{ids[i]}'."); }
                     TCGMarketPriceHistory prices = await GetNewestPrices(listing.TCGplayerId);
                     outlines.Add(new TCGplayerIOItem()
                     {
@@ -440,15 +484,13 @@ namespace CardLib
                         TCGLowPriceWithShipping = prices.TCGLowPriceWithShipping.ToString("9.00"),
                         TCGLowPrice = prices.TCGLowPrice.ToString("0.00"),
                         TotalQuantity = listing.TotalQuantity.ToString(),
-                        AddtoQuantity = line.Quantity.ToString(),
+                        AddtoQuantity = (newQuantities?[ids[i]] ?? 0).ToString(),
                         TCGMarketplacePrice = listing.Price.ToString("0.00"),
                         PhotoURL = ""
                     });
                     sb.Append($"\n{outlines[i].ToCSV()}");
                 }
                 return new MemoryStream(Encoding.Default.GetBytes(sb.ToString()));
-            }
-            else { return null; }
         }
 
         public async Task<IEnumerable<Set>> GetSetsFromProductLineId(int id)
@@ -466,15 +508,15 @@ namespace CardLib
         #endregion
     }
 
-    public class TCGplayerImportResult
+    public class TCGplayerFileIngestResult
     {
         public bool ValidHeaders { get; set; }
         public int InvalidRows { get; set; }
         public TCGplayerIOItem[]? Items { get; set; }
 
-        public static TCGplayerImportResult InvalidHeaders => new TCGplayerImportResult() { ValidHeaders = false };
+        public static TCGplayerFileIngestResult InvalidHeaders => new TCGplayerFileIngestResult() { ValidHeaders = false };
 
-        public TCGplayerImportResult(TCGplayerIOItem[]? items = null, int invalid = 0)
+        public TCGplayerFileIngestResult(TCGplayerIOItem[]? items = null, int invalid = 0)
         {
             ValidHeaders = true;
             Items = items;

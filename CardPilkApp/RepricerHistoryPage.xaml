@@ -70,11 +70,9 @@
                         <Label Text="{Binding NetChangeString}" Grid.Column="8" VerticalOptions="Center"/>
                         <HorizontalStackLayout Grid.Column="9" Spacing="10" VerticalOptions="Center">
                             <ImageButton Source="file_output.png" Background="CornflowerBlue" HeightRequest="20" WidthRequest="20"
-                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CartListViewModel}}, Path=ExportCartCommand}"
-                                         CommandParameter="{Binding .}"/>
-                            <ImageButton Source="x.png" Background="IndianRed" HeightRequest="20" WidthRequest="20"
-                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CartListViewModel}}, Path=DeleteCartCommand}"
-                                         CommandParameter="{Binding .}"/>
+                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:RepricerHistoryViewModel}}, Path=ExportRepricerUpdateCommand}"
+                                         CommandParameter="{Binding Id}"/>
+                            <ImageButton Source="x.png" Background="IndianRed" HeightRequest="20" WidthRequest="20"/>
                         </HorizontalStackLayout>
                     </Grid>
                 </DataTemplate>

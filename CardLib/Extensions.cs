@@ -70,5 +70,15 @@ namespace CardLib
             }
             return sb.ToString();
         }
+
+        public static Dictionary<int, int> ToDict(this IEnumerable<(int x, int y)> items)
+        {
+            Dictionary<int, int> dict = new(items.Count());
+            foreach(var item in items)
+            {
+                dict.Add(item.x, item.y);
+            }
+            return dict;
+        }
     }
 }

@@ -239,7 +239,6 @@
                 <ImageButton Source="history.png" Clicked="CartHistory_Clicked" HeightRequest="30" BackgroundColor="CornflowerBlue" />
                 <ImageButton Source="save.png" Clicked="SaveCart_Clicked" HeightRequest="30" BackgroundColor="Goldenrod" />
                 <ImageButton Source="trash.png" Command="{Binding ClearCartCommand}" HeightRequest="30" BackgroundColor="IndianRed" />
-                
             </HorizontalStackLayout>
         </Grid>
     </Grid>

@@ -1,4 +1,5 @@
 ﻿using CardLib;
+using CardLib.Models;
 using CardPilkApp.ViewModels;
 using System.Text;
 
@@ -25,26 +26,24 @@ namespace CardPilkApp
         {
             FileResult? result = await FilePicker.PickAsync(PickOptions.Default);
             if (result == null) return;
-            TCGplayerImportResult res = await manager.ImportFromTCGplayer(result);
-            if (!res.ValidHeaders)
+            ImportBatch? res = await manager.ImportFromTCGplayer(result);
+            if (res != null)
             {
-                await DisplayAlert("TCGplayer Import", "Invalid Headers detected. Please correct and try again.", "Done");
+                var resstr = new StringBuilder();
+                resstr.AppendLine($"Valid Rows: {res.GetItems()?.Length ?? 0}");
+                resstr.AppendLine($"Invalid Rows: {res.InvalidRows}");
+                resstr.AppendLine($"Created Cards: {res.CreatedCards}");
+                resstr.AppendLine($"Created Conditions: {res.CreatedConditions}");
+                resstr.AppendLine($"Created ProductLines: {res.CreatedProductLines}");
+                resstr.AppendLine($"Created Rarities: {res.CreatedRarities}");
+                resstr.AppendLine($"Created Sets: {res.CreatedSets}");
+                resstr.AppendLine($"Created Prices: {res.CreatedPrices}");
+                resstr.AppendLine($"Updated Qtys: {res.UpdatedQuantities}");
+                await DisplayAlert("TCGplayer Import", resstr.ToString(), "Done");
+                _viewmodel.ResetFilters();
+                _viewmodel.Search();
             }
-            if (res.Items == null) return;
-            TCGplayerUpsertResult ures = await manager.UpsertTCGplayerRows(res.Items);
-            var resstr = new StringBuilder();
-            resstr.AppendLine($"Valid Rows: {res.Items?.Length ?? 0}");
-            resstr.AppendLine($"Invalid Rows: {res.InvalidRows}");
-            resstr.AppendLine($"Created Cards: {ures.CreatedCards}");
-            resstr.AppendLine($"Created Conditions: {ures.CreatedConditions}");
-            resstr.AppendLine($"Created ProductLines: {ures.CreatedProductLines}");
-            resstr.AppendLine($"Created Rarities: {ures.CreatedRarities}");
-            resstr.AppendLine($"Created Sets: {ures.CreatedSets}");
-            resstr.AppendLine($"Created Prices: {ures.CreatedPrices}");
-            resstr.AppendLine($"Updated Qtys: {ures.UpdatedQuantities}");
-            await DisplayAlert("TCGplayer Import", resstr.ToString(), "Done");
-            _viewmodel.ResetFilters();
-            _viewmodel.Search();
+            else await DisplayAlert("TCGplayer Import", "Invalid Headers detected. Please correct and try again.", "Done");
         }
 
         private void SearchInput_Completed(object sender, EventArgs e)
