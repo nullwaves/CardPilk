@@ -15,6 +15,7 @@ namespace CardPilkApp.DataObjects
         public string CardNumber { get; set; }
         public Rarity Rarity { get; set; }
         public List<CardVariantDO> Variants { get; set; }
+        public string ImagePath { get; set; } = "default_card.png";
         public string Price => Variants.First().PriceString;
         public string TCGMarket => Variants.First().TCGMarket;
         public string TCGLow => Variants.First().TCGLow;

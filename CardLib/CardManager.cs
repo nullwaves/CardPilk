@@ -88,8 +88,6 @@ namespace CardLib
                     invalidLines++;
                 }
             }
-            // Do not return here, remove the check logic from viewmodel and call
-            // upsert here, returning an updated ImportBatch instead
             TCGplayerUpsertResult ures = await UpsertTCGplayerRows(items);
             int[] tcgids = items.Select(x => x.TCGplayerId).ToArray();
             int[] batchItems = (await _connection.Table<CardListing>().Where(x => tcgids.Contains(x.TCGplayerId)).ToListAsync()).Select(x => x.Id).ToArray();

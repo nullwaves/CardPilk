@@ -26,7 +26,10 @@ namespace CardPilkApp
         {
             FileResult? result = await FilePicker.PickAsync(PickOptions.Default);
             if (result == null) return;
+            _viewmodel.ResultListings.Clear();
+            ImportActivityIndicator.IsVisible = true;
             ImportBatch? res = await manager.ImportFromTCGplayer(result);
+            ImportActivityIndicator.IsVisible = false;
             if (res != null)
             {
                 var resstr = new StringBuilder();
@@ -41,9 +44,9 @@ namespace CardPilkApp
                 resstr.AppendLine($"Updated Qtys: {res.UpdatedQuantities}");
                 await DisplayAlert("TCGplayer Import", resstr.ToString(), "Done");
                 _viewmodel.ResetFilters();
-                _viewmodel.Search();
             }
             else await DisplayAlert("TCGplayer Import", "Invalid Headers detected. Please correct and try again.", "Done");
+            _viewmodel.Search();
         }
 
         private void SearchInput_Completed(object sender, EventArgs e)
@@ -88,7 +91,7 @@ namespace CardPilkApp
             }
         }
 
-        private void VariantPicker_Clicked(object sender, EventArgs e)
+        private void AddToCart_Clicked(object sender, EventArgs e)
         {
             SearchInput.Focus();
             SearchInput.CursorPosition = 0;

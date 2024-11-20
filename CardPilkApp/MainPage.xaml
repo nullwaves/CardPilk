@@ -64,6 +64,7 @@
         </VerticalStackLayout>
         <ScrollView VerticalOptions="Fill" HorizontalOptions="Fill" Grid.Row="1" Background="{StaticResource Gray950}" Padding="25">
             <VerticalStackLayout Spacing="25" >
+                <ActivityIndicator x:Name="ImportActivityIndicator" HorizontalOptions="Center" VerticalOptions="Center" IsRunning="True" IsVisible="Collapse"/>
                 <FlexLayout Wrap="Wrap"
                             Margin="20,0"
                             BindableLayout.ItemsSource="{Binding ResultListings}"
@@ -100,7 +101,7 @@
                                                HorizontalTextAlignment="Center"/>
                                     </Grid>
                                     <Image
-                                        Source="default_card.png"
+                                        Source="{Binding ImagePath}"
                                         HeightRequest="180"
                                         Aspect="AspectFit" />
                                     <Picker ItemsSource="{Binding Variants}"
@@ -159,7 +160,7 @@
                                         <ImageButton HeightRequest="30"
                                                      CommandParameter="{Binding SelectedVariant}"
                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodel:CardListViewModel}}, Path=AddToCartCommand}"
-                                                     Clicked="VariantPicker_Clicked"
+                                                     Clicked="AddToCart_Clicked"
                                                      Source="shopping_cart.png"
                                                      BackgroundColor="LightGreen">
                                         </ImageButton>
@@ -236,6 +237,4 @@
             </HorizontalStackLayout>
         </Grid>
     </Grid>
-
-
 </ContentPage>
