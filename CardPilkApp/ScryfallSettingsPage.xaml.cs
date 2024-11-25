@@ -32,6 +32,5 @@ public partial class ScryfallSettingsPage : ContentPage
                         await ImportProgressBar.ProgressTo(progress, 1, Easing.Linear);
                     });
             });
-        await ImportProgressBar.ProgressTo(1, 120000, Easing.Linear);
     }
 }

@@ -7,7 +7,6 @@ using System.Text;
 
 namespace CardLib
 {
-
     public class CardManager
     {
         // Consts
@@ -108,7 +107,7 @@ namespace CardLib
             if (res < 1)
             {
                 Debug.WriteLine("Error saving Import Batch");
-                if(Debugger.IsAttached) Debugger.Break();
+                if (Debugger.IsAttached) Debugger.Break();
             }
             return batch;
         }
@@ -271,6 +270,11 @@ namespace CardLib
             return await _connection.Table<CardListing>().FirstOrDefaultAsync(x => x.Id == id);
         }
 
+        public async Task<int> GetMissingImagesCount()
+        {
+            return await _connection.Table<CardListing>().Where(x => x.ImageUri == null || x.ImageUri == "default_card.png").CountAsync();
+        }
+
         public async Task<IEnumerable<ProductLine>> GetProductLines()
         {
             return await _connection.Table<ProductLine>().OrderBy(x => x.Name).ToListAsync();
@@ -429,71 +433,71 @@ namespace CardLib
 
         public async Task<Stream?> CreateCSV(int[] ids, Dictionary<int, int>? newQuantities = null)
         {
-                List<TCGplayerIOItem> outlines = new();
-                Dictionary<int, ProductLine> products = new();
-                Dictionary<int, Set> sets = new();
-                Dictionary<int, CardCondition> conditions = new();
-                Dictionary<int, Rarity> raritys = new();
-                StringBuilder sb = new(string.Join(',', TCGplayerHeaders.Select(x => $"\"{x}\"")));
-                async Task<string> getProductLineName(int id)
+            List<TCGplayerIOItem> outlines = new();
+            Dictionary<int, ProductLine> products = new();
+            Dictionary<int, Set> sets = new();
+            Dictionary<int, CardCondition> conditions = new();
+            Dictionary<int, Rarity> raritys = new();
+            StringBuilder sb = new(string.Join(',', TCGplayerHeaders.Select(x => $"\"{x}\"")));
+            async Task<string> getProductLineName(int id)
+            {
+                if (!products.ContainsKey(id))
                 {
-                    if (!products.ContainsKey(id))
-                    {
-                        products[id] = await _connection.Table<ProductLine>().FirstAsync(x => x.Id == id);
-                    }
-                    return products[id].Name;
-                };
-                async Task<string> getSetName(int id)
-                {
-                    if (!sets.ContainsKey(id))
-                    {
-                        sets[id] = await _connection.Table<Set>().FirstAsync(x => x.Id == id);
-                    }
-                    return sets[id].Name;
-                };
-                async Task<string> getConditionName(int id)
-                {
-                    if (!conditions.ContainsKey(id))
-                    {
-                        conditions[id] = await _connection.Table<CardCondition>().FirstAsync(x => x.Id == id);
-                    }
-                    return conditions[id].Name;
-                };
-                async Task<string> getRarityName(int id)
-                {
-                    if (!raritys.ContainsKey(id))
-                    {
-                        raritys[id] = await _connection.Table<Rarity>().FirstAsync(x => x.Id == id);
-                    }
-                    return raritys[id].Name;
-                };
-                for (int i = 0; i < ids.Length; i++)
-                {
-                    CardListing? listing = await GetListingById(ids[i]);
-                    if (listing == null) { throw new Exception($"Database Integrity Exception: Could not locate card '{ids[i]}'."); }
-                    TCGMarketPriceHistory prices = await GetNewestPrices(listing.TCGplayerId);
-                    outlines.Add(new TCGplayerIOItem()
-                    {
-                        TCGplayerId = listing.TCGplayerId,
-                        ProductLine = await getProductLineName(listing.ProductLineId),
-                        SetName = await getSetName(listing.SetId),
-                        ProductName = listing.Name,
-                        Title = "",
-                        CardNumber = listing.CardNumber,
-                        Rarity = await getRarityName(listing.RarityId),
-                        Condition = await getConditionName(listing.ConditionId),
-                        TCGMarketPrice = prices.TCGMarketPrice.ToString("0.00"),
-                        TCGDirectLow = prices.TCGDirectLow.ToString("0.00"),
-                        TCGLowPriceWithShipping = prices.TCGLowPriceWithShipping.ToString("9.00"),
-                        TCGLowPrice = prices.TCGLowPrice.ToString("0.00"),
-                        TotalQuantity = listing.TotalQuantity.ToString(),
-                        AddtoQuantity = (newQuantities?[ids[i]] ?? 0).ToString(),
-                        TCGMarketplacePrice = listing.Price.ToString("0.00"),
-                        PhotoURL = ""
-                    });
-                    sb.Append($"\n{outlines[i].ToCSV()}");
+                    products[id] = await _connection.Table<ProductLine>().FirstAsync(x => x.Id == id);
                 }
-                return new MemoryStream(Encoding.Default.GetBytes(sb.ToString()));
+                return products[id].Name;
+            };
+            async Task<string> getSetName(int id)
+            {
+                if (!sets.ContainsKey(id))
+                {
+                    sets[id] = await _connection.Table<Set>().FirstAsync(x => x.Id == id);
+                }
+                return sets[id].Name;
+            };
+            async Task<string> getConditionName(int id)
+            {
+                if (!conditions.ContainsKey(id))
+                {
+                    conditions[id] = await _connection.Table<CardCondition>().FirstAsync(x => x.Id == id);
+                }
+                return conditions[id].Name;
+            };
+            async Task<string> getRarityName(int id)
+            {
+                if (!raritys.ContainsKey(id))
+                {
+                    raritys[id] = await _connection.Table<Rarity>().FirstAsync(x => x.Id == id);
+                }
+                return raritys[id].Name;
+            };
+            for (int i = 0; i < ids.Length; i++)
+            {
+                CardListing? listing = await GetListingById(ids[i]);
+                if (listing == null) { throw new Exception($"Database Integrity Exception: Could not locate card '{ids[i]}'."); }
+                TCGMarketPriceHistory prices = await GetNewestPrices(listing.TCGplayerId);
+                outlines.Add(new TCGplayerIOItem()
+                {
+                    TCGplayerId = listing.TCGplayerId,
+                    ProductLine = await getProductLineName(listing.ProductLineId),
+                    SetName = await getSetName(listing.SetId),
+                    ProductName = listing.Name,
+                    Title = "",
+                    CardNumber = listing.CardNumber,
+                    Rarity = await getRarityName(listing.RarityId),
+                    Condition = await getConditionName(listing.ConditionId),
+                    TCGMarketPrice = prices.TCGMarketPrice.ToString("0.00"),
+                    TCGDirectLow = prices.TCGDirectLow.ToString("0.00"),
+                    TCGLowPriceWithShipping = prices.TCGLowPriceWithShipping.ToString("9.00"),
+                    TCGLowPrice = prices.TCGLowPrice.ToString("0.00"),
+                    TotalQuantity = listing.TotalQuantity.ToString(),
+                    AddtoQuantity = (newQuantities?[ids[i]] ?? 0).ToString(),
+                    TCGMarketplacePrice = listing.Price.ToString("0.00"),
+                    PhotoURL = ""
+                });
+                sb.Append($"\n{outlines[i].ToCSV()}");
+            }
+            return new MemoryStream(Encoding.Default.GetBytes(sb.ToString()));
         }
 
         public async Task<IEnumerable<Set>> GetSetsFromProductLineId(int id)

@@ -5,18 +5,20 @@
              x:Class="CardPilkApp.ScryfallSettingsPage"
              Title="Scryfall Settings"
              x:DataType="vm:ScryfallSettingsViewmodel">
-    <VerticalStackLayout>
-        <VerticalStackLayout x:Name="PageControls">
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
-                <ImageButton Source ="download.png" HorizontalOptions="Center" Background="CornflowerBlue" Clicked="UpdateFromScryfall_Clicked"/>
-                <Label Text="Link Images From Scryfall" VerticalOptions="Center"/>
-            </HorizontalStackLayout>
-            <ActivityIndicator x:Name="ImportActivityIndicator" HorizontalOptions="Center" VerticalOptions="Center" IsRunning="True" IsVisible="{Binding ImportActivity}"/>
-            <ProgressBar x:Name="ImportProgressBar" IsVisible="{Binding ImportActivity}" ProgressColor="{StaticResource Primary}" MaximumWidthRequest="600"/>
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
-                <Label Text="Checked Cards:" VerticalOptions="Center"/>
-                <Label Text="{Binding Cards.Count}" VerticalOptions="Center"/>
-            </HorizontalStackLayout>
-        </VerticalStackLayout>
+    <VerticalStackLayout Spacing="10">
+        <HorizontalStackLayout HorizontalOptions="Center" Spacing="5">
+            <Label Text="Cards Missing Images:"/>
+            <Label Text="{Binding MissingImages}" />
+        </HorizontalStackLayout>
+        <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+            <ImageButton Source ="download.png" HorizontalOptions="Center" Background="CornflowerBlue" Clicked="UpdateFromScryfall_Clicked"/>
+            <Label Text="Link Images From Scryfall" VerticalOptions="Center"/>
+        </HorizontalStackLayout>
+        <ActivityIndicator x:Name="ImportActivityIndicator" HorizontalOptions="Center" VerticalOptions="Center" IsRunning="True" IsVisible="{Binding ImportActivity}"/>
+        <ProgressBar x:Name="ImportProgressBar" IsVisible="{Binding ImportActivity}" ProgressColor="{StaticResource Primary}" MaximumWidthRequest="600"/>
+        <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+            <Label Text="Checked Cards:" VerticalOptions="Center"/>
+            <Label Text="{Binding Cards.Count}" VerticalOptions="Center"/>
+        </HorizontalStackLayout>
     </VerticalStackLayout>
 </ContentPage>

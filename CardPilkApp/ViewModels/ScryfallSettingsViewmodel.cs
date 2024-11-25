@@ -2,7 +2,6 @@
 using CardPilkApp.DataObjects;
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using Humanizer;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -14,6 +13,8 @@ namespace CardPilkApp.ViewModels
     {
         public ObservableCollection<ScryfallCard> Cards { get; set; }
         [ObservableProperty]
+        private int missingImages;
+        [ObservableProperty]
         private bool _importActivity = false;
 
         private CardManager _manager;
@@ -22,6 +23,12 @@ namespace CardPilkApp.ViewModels
         {
             _manager = App.CardLib.GetManager();
             Cards = [];
+            UpdateMissingImageCount();
+        }
+
+        private async void UpdateMissingImageCount()
+        {
+            MissingImages = await _manager.GetMissingImagesCount();
         }
 
         internal void SetImportActivity(bool state)
@@ -54,6 +61,7 @@ namespace CardPilkApp.ViewModels
                     await progressCallback.Invoke(percent);
                 }
             }
+            UpdateMissingImageCount();
             SetImportActivity(false);
             await Shell.Current.DisplayAlert("Scryfall Service", $"Linked images to {numUpdated.ToMetric()} cards.", "OK");
         }
