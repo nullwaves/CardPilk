@@ -398,6 +398,11 @@ namespace CardLib
             return _connection.Table<CardListing>();
         }
 
+        public async Task<int> UpdateListing(CardListing pcard)
+        {
+            return await _connection.UpdateAsync(pcard);
+        }
+
         #region Export Fns
 
         public async Task<Stream?> CreateCSVFromCart(int id)

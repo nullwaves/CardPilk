@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:CardPilkApp.ViewModels"
+             x:Class="CardPilkApp.ScryfallSettingsPage"
+             Title="Scryfall Settings"
+             x:DataType="vm:ScryfallSettingsViewmodel">
+    <VerticalStackLayout>
+        <VerticalStackLayout x:Name="PageControls">
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                <ImageButton Source ="download.png" HorizontalOptions="Center" Background="CornflowerBlue" Clicked="UpdateFromScryfall_Clicked"/>
+                <Label Text="Link Images From Scryfall" VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+            <ActivityIndicator x:Name="ImportActivityIndicator" HorizontalOptions="Center" VerticalOptions="Center" IsRunning="True" IsVisible="{Binding ImportActivity}"/>
+            <ProgressBar x:Name="ImportProgressBar" IsVisible="{Binding ImportActivity}" ProgressColor="{StaticResource Primary}" MaximumWidthRequest="600"/>
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                <Label Text="Checked Cards:" VerticalOptions="Center"/>
+                <Label Text="{Binding Cards.Count}" VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </VerticalStackLayout>
+</ContentPage>

@@ -10,6 +10,6 @@
 + [✔️] Create "Carts" with inventory changes
 + [✔️] Export "Carts" for staging changes into TCGplayer
 + [✔️] Export CSV files for TCGplayer with updated prices
-+ [❌] Scryfall Integration
-+ [❌] Lorcast Integration
++ [✔️] Scryfall Integration (Card Images)
++ [❌] Lorcast Integration (Card Images)
 + [❌] Local Image Caching

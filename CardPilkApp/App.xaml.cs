@@ -10,6 +10,7 @@ namespace CardPilkApp
         public static IServiceProvider ServiceProvider;
         public static IAlertService Alerts;
         public static ICardLibService CardLib;
+        public static IScryfallService Scryfall;
 
         public App(IServiceProvider provider)
         {
@@ -17,6 +18,7 @@ namespace CardPilkApp
             ServiceProvider = provider;
             Alerts = provider.GetService<IAlertService>();
             CardLib = provider.GetService<ICardLibService>();
+            Scryfall = provider.GetService<IScryfallService>();
             MainPage = new AppShell();
         }
     }

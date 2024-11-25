@@ -20,6 +20,7 @@ namespace CardPilkApp
 
             builder.Services.AddSingleton<IAlertService, AlertService>();
             builder.Services.AddSingleton<ICardLibService, CardLibService>();
+            builder.Services.AddSingleton<IScryfallService, ScryfallService>();
 
 #if DEBUG
     		builder.Logging.AddDebug();

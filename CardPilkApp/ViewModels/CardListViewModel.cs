@@ -95,8 +95,14 @@ namespace CardPilkApp.ViewModels
                     CardNumber = l.CardNumber,
                     Rarity = raritys.Where(x => x.Id == l.RarityId).First(),
                     Variants = [],
+                    ImagePath = l.ImageUri?.Length > 0 ? l.ImageUri : "default_card.png",
                 };
                 var variants = newListings.Where(x => x.Name == l.Name).ToArray();
+                var imagehavers = variants.FirstOrDefault(x => x.ImageUri != null && x.ImageUri != "default_card.png" && x.ImageUri.Length > 0);
+                if (imagehavers != null)
+                {
+                    mlist.ImagePath = imagehavers.ImageUri;
+                }
                 foreach (CardListing variant in variants)
                 {
                     TCGMarketPriceHistory pricing = await manager.GetNewestPrices(l.TCGplayerId);

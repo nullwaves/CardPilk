@@ -113,5 +113,10 @@ namespace CardPilkApp
         {
             await Shell.Current.GoToAsync("/Carts");
         }
+
+        private async void OnSettingsClicked(object sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("/Scryfall");
+        }
     }
 }

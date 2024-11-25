@@ -9,12 +9,15 @@
              x:DataType="viewmodel:CardListViewModel"
              Loaded="Page_Loaded">
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Import"
-                     IconImageSource="upload.png"
-                     Clicked="OnImportClicked"/>
         <ToolbarItem Text="Repricer Tool"
                      IconImageSource="tag.png"
                      Clicked="OnRepricerClicked"/>
+        <ToolbarItem Text="Settings"
+                     IconImageSource="wrench.png"
+                     Clicked="OnSettingsClicked"/>
+        <ToolbarItem Text="Import"
+                     IconImageSource="upload.png"
+                     Clicked="OnImportClicked"/>
     </ContentPage.ToolbarItems>
     <Grid Padding="20,0,20,20" VerticalOptions="FillAndExpand">
         <Grid.RowDefinitions>

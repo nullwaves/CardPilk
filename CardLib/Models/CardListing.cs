@@ -20,5 +20,6 @@ namespace CardLib.Models
         public int ConditionId { get; set; }
         public int TotalQuantity { get; set; }
         public decimal Price { get; set; }
+        public string ImageUri { get; set; }
     }
 }
