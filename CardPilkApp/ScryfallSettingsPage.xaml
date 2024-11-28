@@ -10,10 +10,17 @@
             <Label Text="Cards Missing Images:"/>
             <Label Text="{Binding MissingImages}" />
         </HorizontalStackLayout>
+        
         <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
-            <ImageButton Source ="download.png" HorizontalOptions="Center" Background="CornflowerBlue" Clicked="UpdateFromScryfall_Clicked"/>
+            <ImageButton x:Name="ScryfallImportButton" Source ="download.png" HorizontalOptions="Center" Background="CornflowerBlue" Clicked="UpdateFromScryfall_Clicked"/>
             <Label Text="Link Images From Scryfall" VerticalOptions="Center"/>
         </HorizontalStackLayout>
+
+        <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+            <ImageButton x:Name="LorcastImportButton" Source ="download.png" HorizontalOptions="Center" Background="Plum" Clicked="UpdateFromLorcast_Clicked"/>
+            <Label Text="Link Images From Lorcast" VerticalOptions="Center"/>
+        </HorizontalStackLayout>
+        
         <ActivityIndicator x:Name="ImportActivityIndicator" HorizontalOptions="Center" VerticalOptions="Center" IsRunning="True" IsVisible="{Binding ImportActivity}"/>
         <ProgressBar x:Name="ImportProgressBar" IsVisible="{Binding ImportActivity}" ProgressColor="{StaticResource Primary}" MaximumWidthRequest="600"/>
         <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">

@@ -140,7 +140,7 @@ namespace CardLib
                     var set = await GetSetByName(rawItem.SetName);
                     if (set == null)
                     {
-                        int setin = await _connection.InsertAsync(new Set() { Name = rawItem.SetName });
+                        int setin = await _connection.InsertAsync(new Set() { ProductLineId = productLine.Id, Name = rawItem.SetName });
                         results.CreatedSets += setin;
                         set = await GetSetByName(rawItem.SetName);
                         if (set == null) throw new Exception("Failed to Insert new Set");
@@ -295,6 +295,11 @@ namespace CardLib
             return await _connection.Table<Set>().OrderBy(x => x.Name).ToListAsync();
         }
 
+        public async Task<IEnumerable<Set>> GetSetsFromProductLine(int productLineId)
+        {
+            return await _connection.Table<Set>().Where(x => x.ProductLineId == productLineId).ToListAsync();
+        }
+
         public async Task<TCGMarketPriceHistory> GetNewestPrices(int tcgId)
         {
             var price = await _connection
@@ -402,6 +407,11 @@ namespace CardLib
             return _connection.Table<CardListing>();
         }
 
+        public AsyncTableQuery<ProductLine> QueryProductLines()
+        {
+            return _connection.Table<ProductLine>();
+        }
+
         public async Task<int> UpdateListing(CardListing pcard)
         {
             return await _connection.UpdateAsync(pcard);
@@ -498,14 +508,6 @@ namespace CardLib
                 sb.Append($"\n{outlines[i].ToCSV()}");
             }
             return new MemoryStream(Encoding.Default.GetBytes(sb.ToString()));
-        }
-
-        public async Task<IEnumerable<Set>> GetSetsFromProductLineId(int id)
-        {
-            string query = $"SELECT * FROM `Set` WHERE Id IN (SELECT SetId FROM CardListing WHERE ProductLineId=?);";
-            object[] args = { id };
-            var mapping = await _connection.GetMappingAsync<Set>();
-            return await _connection.QueryAsync<Set>(query, args);
         }
 
         public async Task<IEnumerable<RepricerUpdate>> GetRepricerUpdates(int limit)

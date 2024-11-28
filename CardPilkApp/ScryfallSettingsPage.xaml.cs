@@ -4,6 +4,10 @@ namespace CardPilkApp;
 
 public partial class ScryfallSettingsPage : ContentPage
 {
+    Func<double, Task> UpdateProgressCallback => async (double progress) =>
+    {
+        await ImportProgressBar.ProgressTo(progress, 1, Easing.Linear);
+    };
     private ScryfallSettingsViewmodel _viewmodel;
 
     public ScryfallSettingsPage()
@@ -27,10 +31,13 @@ public partial class ScryfallSettingsPage : ContentPage
             {
                 await _viewmodel.LinkImagesFromScryfall(
                     stream,
-                    async (double progress) =>
-                    {
-                        await ImportProgressBar.ProgressTo(progress, 1, Easing.Linear);
-                    });
+                    UpdateProgressCallback);
             });
+    }
+
+    private async void UpdateFromLorcast_Clicked(object sender, EventArgs e)
+    {
+        ImportProgressBar.Progress = 0;
+        await _viewmodel.LinkImagesFromLorcast(UpdateProgressCallback);
     }
 }

@@ -133,7 +133,7 @@ namespace CardPilkApp.ViewModels
             List<Set> lsets;
             if (line?.Id > -1)
             {
-                lsets = (await manager.GetSetsFromProductLineId(line.Id)).ToList();
+                lsets = (await manager.GetSetsFromProductLine(line.Id)).ToList();
             }
             else
             {
