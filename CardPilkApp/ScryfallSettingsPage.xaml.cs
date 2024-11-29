@@ -38,6 +38,10 @@ public partial class ScryfallSettingsPage : ContentPage
     private async void UpdateFromLorcast_Clicked(object sender, EventArgs e)
     {
         ImportProgressBar.Progress = 0;
-        await _viewmodel.LinkImagesFromLorcast(UpdateProgressCallback);
+        Dispatcher.Dispatch(
+            async () =>
+            {
+                await _viewmodel.LinkImagesFromLorcast(UpdateProgressCallback);
+            });
     }
 }

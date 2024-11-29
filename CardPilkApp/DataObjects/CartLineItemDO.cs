@@ -12,6 +12,8 @@ namespace CardPilkApp.DataObjects
         [ObservableProperty]
         private int quantity;
 
+        public string Image { get; set; }
+
         public string PriceString => Price.ToString("$0.00");
         public decimal Subtotal => Price * Quantity;
     }

@@ -84,6 +84,8 @@
                                     <Label Text="{Binding Name}"
                                            FontAutoScalingEnabled="True"
                                            Style="{StaticResource CardName}"/>
+                                    <Label Text="{Binding Set}"
+                                           HorizontalOptions="Center"/>
                                     <HorizontalStackLayout HorizontalOptions="CenterAndExpand">
                                         <Label Text="{Binding CardNumber}"
                                                Padding="10,0"/>
@@ -195,7 +197,7 @@
                                         <ColumnDefinition Width="60"/>
                                         <ColumnDefinition/>
                                     </Grid.ColumnDefinitions>
-                                    <Image Source="default_card.png"
+                                    <Image Source="{Binding Image}"
                                        HeightRequest="80"
                                        Aspect="AspectFit"
                                        Margin="5"/>

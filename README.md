@@ -11,5 +11,5 @@
 + [✔️] Export "Carts" for staging changes into TCGplayer
 + [✔️] Export CSV files for TCGplayer with updated prices
 + [✔️] Scryfall Integration (Card Images)
-+ [❌] Lorcast Integration (Card Images)
++ [✔️] Lorcast Integration (Card Images)
 + [❌] Local Image Caching

@@ -42,6 +42,7 @@ namespace CardPilkApp.ViewModels
                         Condition = conds.First(x => x.Id == listing.ConditionId).Name,
                         Price = line.Price,
                         Quantity = line.Quantity,
+                        Image = listing.ImageUri?.Length > 0 ? listing.ImageUri : "default_card.png"
                     });
                 }
                 Carts.Add(new()

@@ -130,7 +130,7 @@ namespace CardPilkApp.ViewModels
                 {
                     Debug.WriteLine($"Failed to match Pilk Set \"{set.Name}\" to Lorcast Sets!");
                 }
-                if (i % 10 == 0) { await progressCallback.Invoke(i / listings.Count); }
+                if (i % 10 == 0) { await progressCallback.Invoke((double)i / listings.Count); }
             }
             await Shell.Current.DisplayAlert("Lorcast Service", $"Updated images for {numUpdated} cards.", "OK");
             SetImportActivity(false);

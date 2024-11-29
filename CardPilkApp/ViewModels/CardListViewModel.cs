@@ -244,6 +244,7 @@ namespace CardPilkApp.ViewModels
                     Condition = card.Condition.Name,
                     Price = card.Price,
                     Quantity = 1,
+                    Image = listing.ImagePath?.Length > 0 ? listing.ImagePath : "default_card.png"
                 });
             }
             RecalculateCart();
